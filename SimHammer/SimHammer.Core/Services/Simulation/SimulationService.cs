@@ -1,41 +1,104 @@
 using System;
+using System.Reflection.Metadata;
 using SimHammer.Core.Models.Simulation;
 using SimHammer.Core.Models.Units;
+using SimHammer.Core.Services.Interfaces;
 
 namespace SimHammer.Core.Services.Simulation;
 
-public static class SimulationService
+public class SimulationService : ISimulationService
 {
     // These functions will manage the flow of the combat simulation
 
-    public static SimulationResult BeginSimulation(Unit attacker, Unit defender)
+    public SimulationResult BeginSimulation(Unit attacker, Unit defender, int rounds, bool isMelee = false)
     {
-        // Initialize the simulation result
         SimulationResult result = new SimulationResult
         {
-            StartTime = DateTime.Now,
-            EndTime = DateTime.Now.AddMinutes(30), // Example duration, can be adjusted
-            Status = "In Progress",
+            Attacker = attacker,
+            Defender = defender,
             TotalRounds = 0,
-            AttackerUnits = new List<Unit> { attacker },
-            DefenderUnits = new List<Unit> { defender }
+            CombatRounds = new List<CombatRound>(),
+            StartTime = DateTime.Now,
+            IsComplete = false,
+            IsMeleeCombat = isMelee
         };
 
-        // Start the combat rounds
-        while (result.Status == "In Progress")
-        {
-            // Simulate a round of combat
-            result.TotalRounds++;
-            // Logic for combat resolution goes here
+        int roundsCompleted = 0;
 
-            // For now, we will just simulate a simple end condition
-            if (result.TotalRounds >= 10) // Example condition to end the simulation
-            {
-                result.Status = "Completed";
-                result.EndTime = DateTime.Now;
-            }
+        for (int i = 1; i <= rounds; i++)
+        {
+            result.CombatRounds.Add(result.IsMeleeCombat ? SimulateMeleeCombatRound(attacker, defender, i) :
+                                                           SimulateRangedCombatRound(attacker, defender, i));
+            roundsCompleted++;
         }
 
+        result.TotalRounds = roundsCompleted;
+        result.EndTime = DateTime.Now;
+
         return result;
+    }
+
+    public CombatRound SimulateRangedCombatRound(Unit attacker, Unit defender, int roundNumber)
+    {
+        CombatRound round = new CombatRound
+        {
+            Id = roundNumber,
+            SimNumber = roundNumber,
+            AttacksMade = 0,
+            Hits = 0,
+            WoundsInflicted = 0,
+            SavesMade = 0,
+            InvulnSavesMade = 0,
+            ModelsKilled = 0,
+            MoraleSuccessChance = 1.0 // Placeholder for morale success chance
+        };
+
+        // Simulate the combat logic here
+
+        // Conduct combat for each ranged weapon
+        foreach (RangedWeapon weapon in attacker.RangedWeapons)
+        {
+            int numAttacks = weapon.Attacks * weapon.Quantity;
+            for (int i = 1; i <= numAttacks; i++)
+            {
+                round.AttacksMade++;
+
+                int hitRoll = DiceRoller.RollD6();
+                if (hitRoll == 6)
+                {
+                    round.Hits++;
+                }
+                else
+                {
+                    // Compare the Strength of the weapon against the Toughness of the defender
+                    
+                }
+            }
+
+            }
+        }
+        return round;
+    }
+    
+    public CombatRound SimulateMeleeCombatRound(Unit attacker, Unit defender, int roundNumber)
+    {
+        CombatRound round = new CombatRound
+        {
+            Id = roundNumber,
+            SimNumber = roundNumber,
+            AttacksMade = 0,
+            Hits = 0,
+            WoundsInflicted = 0,
+            SavesMade = 0,
+            InvulnSavesMade = 0,
+            ModelsKilled = 0,
+            MoraleSuccessChance = 1.0 // Placeholder for morale success chance
+        };
+
+        // Simulate the combat logic here
+
+        // For each attack, calculate hits, wounds, saves, etc.
+
+        return round;
     }
 }

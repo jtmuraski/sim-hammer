@@ -11,7 +11,7 @@ public class CombatRound
     public int TotalWoundsInflicted => WeaponResults.Sum(wr => wr.WoundsInflicted); // Total wounds inflicted from WeaponResults
     public int TotalSavesMade => WeaponResults.Sum(wr => wr.SavesMade);
     public int TotalInvulnSavesMade => WeaponResults.Sum(wr => wr.InvulnSavesMade);
-    public int TotalDamageDealt => WeaponResults.Sum(wr => wr.DamageDealt
+    public int TotalDamageDealt => WeaponResults.Sum(wr => wr.DamageDealt);
     public int ModelsKilled {get; set;}
     public double MoraleSuccessChance {get; set;} // Percentage chance of passing morale test
     public List<WeaponResult> WeaponResults { get; set; } = new List<WeaponResult>();

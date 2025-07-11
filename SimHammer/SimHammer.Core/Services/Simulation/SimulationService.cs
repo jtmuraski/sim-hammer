@@ -79,8 +79,8 @@ public class SimulationService : ISimulationService
                 }
             }
 
-            // Calculate wounds inflicted for each hit
-            for (int i = 0; i <= round.Hits; i++)
+            // Roll for wounds for each hit
+            for (int i = 0; i <= result.Hits; i++)
             {
                 // Calculate if the hit results in a wound
                 int resultNeeded = 0;
@@ -129,15 +129,20 @@ public class SimulationService : ISimulationService
                 if (saveRoll > 1 && apRollResult > defender.Save)
                 {
                     // The save has failed, so calculate the damage
-                    result.
+                    result.DamageDealt += weapon.Damage;
                 }
                 else
                 {
                     result.SavesMade++;
                 }
             }
+
+            round.WeaponResults.Add(result);
         }
 
+        // Calculate the total number of models killed
+        int totalWounds = round.WeaponResults.Sum(wr => wr.DamageDealt);
+        round.ModelsKilled = totalWounds / defender.Wounds;
         return round;
     }
     
@@ -147,11 +152,6 @@ public class SimulationService : ISimulationService
         {
             Id = roundNumber,
             SimNumber = roundNumber,
-            AttacksMade = 0,
-            Hits = 0,
-            WoundsInflicted = 0,
-            SavesMade = 0,
-            InvulnSavesMade = 0,
             ModelsKilled = 0,
             MoraleSuccessChance = 1.0 // Placeholder for morale success chance
         };

@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimHammer.Core", "SimHammer.Core\SimHammer.Core.csproj", "{C968FBBE-C891-4F1E-B9DD-73EAF4AABA09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimHammer.Console", "SimHammer.Console\SimHammer.Console.csproj", "{CA1D97B2-029E-4F4C-A61C-C638A3066418}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C968FBBE-C891-4F1E-B9DD-73EAF4AABA09} = {C968FBBE-C891-4F1E-B9DD-73EAF4AABA09}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

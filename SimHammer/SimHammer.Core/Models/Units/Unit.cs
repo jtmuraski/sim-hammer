@@ -8,6 +8,7 @@ namespace SimHammer.Core.Models.Units
 {
     public class Unit
     {
+        // ---Properties---
         public string Name { get; set; }
         public string? Faction { get; set; }
         public string? Subfaction { get; set; }
@@ -15,7 +16,6 @@ namespace SimHammer.Core.Models.Units
         public int Strength { get; set; }
         public int Toughness { get; set; }
         public int Wounds { get; set; }
-        public int Attacks { get; set; }
         public int Leadership { get; set; }
         public int Save { get; set; } // Armor Save
         public int InvulnSave { get; set; }
@@ -23,18 +23,17 @@ namespace SimHammer.Core.Models.Units
         public List<MeleeWeapon> MeleeWeapons { get; set; } = new List<MeleeWeapon>();
         public List<RangedWeapon> RangedWeapons { get; set; } = new List<RangedWeapon>();
 
+        // ---Constructors---
         public Unit()
         {
-        
         }
-        public Unit(string name, int movement, int weaponSkill, int ballisticSkill, int strength, int toughness, int wounds, int attacks, int leadership, int save, int invuln, int modelCount)
+        public Unit(string name, int movement, int weaponSkill, int ballisticSkill, int strength, int toughness, int wounds, int leadership, int save, int invuln, int modelCount)
         {
             Name = name;
             Movement = movement;
             Strength = strength;
             Toughness = toughness;
             Wounds = wounds;
-            Attacks = attacks;
             Leadership = leadership;
             Save = save;
             InvulnSave = invuln;

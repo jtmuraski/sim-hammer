@@ -145,8 +145,13 @@ public class SimulationService : ISimulationService
                     result.SavesMade++;
                 }
             }
+
+            round.WeaponResults.Add(result);
         }
 
+        // Calculate the total number of models killed
+        int totalWounds = round.WeaponResults.Sum(wr => wr.DamageDealt);
+        round.ModelsKilled = totalWounds / defender.Wounds;
         return round;
     }
     

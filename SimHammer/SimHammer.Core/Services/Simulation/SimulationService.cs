@@ -1,5 +1,6 @@
 using System;
 using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Xml.XPath;
 using SimHammer.Core.Models.Simulation;
 using SimHammer.Core.Models.Units;
@@ -9,34 +10,42 @@ namespace SimHammer.Core.Services.Simulation;
 
 public class SimulationService : ISimulationService
 {
+    // ---Fields---
+    SimulationResult SimResult { get;set ; }
+    bool IsSimulationComplete { get; set; }
+
     // These functions will manage the flow of the combat simulation
+
+    
+    // ---Contructors---
+    public SimulationService()
+    {
+        SimResult = new SimulationResult();
+        IsSimulationComplete = false;
+    }
 
     public SimulationResult BeginSimulation(Unit attacker, Unit defender, int rounds, bool isMelee = false)
     {
-        SimulationResult result = new SimulationResult
-        {
-            Attacker = attacker,
-            Defender = defender,
-            TotalRounds = 0,
-            CombatRounds = new List<CombatRound>(),
-            StartTime = DateTime.Now,
-            IsComplete = false,
-            IsMeleeCombat = isMelee
-        };
+        SimResult.Attacker = attacker;
+        SimResult.Defender = defender;
+        SimResult.TotalRounds = 0;
+        SimResult.CombatRounds = new List<CombatRound>();
+        SimResult.StartTime = DateTime.Now;
+        SimResult.IsMeleeCombat = isMelee;
 
         int roundsCompleted = 0;
 
         for (int i = 1; i <= rounds; i++)
         {
-            result.CombatRounds.Add(result.IsMeleeCombat ? SimulateMeleeCombatRound(attacker, defender, i) :
+            SimResult.CombatRounds.Add(SimResult.IsMeleeCombat ? SimulateMeleeCombatRound(attacker, defender, i) :
                                                            SimulateRangedCombatRound(attacker, defender, i));
             roundsCompleted++;
         }
 
-        result.TotalRounds = roundsCompleted;
-        result.EndTime = DateTime.Now;
+        SimResult.TotalRounds = roundsCompleted;
+        SimResult.EndTime = DateTime.Now;
 
-        return result;
+        return SimResult;
     }
 
     public CombatRound SimulateRangedCombatRound(Unit attacker, Unit defender, int roundNumber)
@@ -80,9 +89,9 @@ public class SimulationService : ISimulationService
             }
 
             // Calculate wounds inflicted for each hit
-            for (int i = 0; i <= round.Hits; i++)
+            for (int i = 0; i <= result.Hits; i++)
             {
-                // Calculate if the hit results in a wound
+                // Calculate what roll is needed to cause a wound
                 int resultNeeded = 0;
                 if (weapon.Strength >= (defender.Toughness * 2))
                 {
@@ -129,7 +138,7 @@ public class SimulationService : ISimulationService
                 if (saveRoll > 1 && apRollResult > defender.Save)
                 {
                     // The save has failed, so calculate the damage
-                    result.
+                    result.WoundsInflicted += weapon.Damage;
                 }
                 else
                 {
@@ -147,11 +156,6 @@ public class SimulationService : ISimulationService
         {
             Id = roundNumber,
             SimNumber = roundNumber,
-            AttacksMade = 0,
-            Hits = 0,
-            WoundsInflicted = 0,
-            SavesMade = 0,
-            InvulnSavesMade = 0,
             ModelsKilled = 0,
             MoraleSuccessChance = 1.0 // Placeholder for morale success chance
         };

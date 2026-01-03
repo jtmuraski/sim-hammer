@@ -15,12 +15,10 @@ public class SimulationResult
     public DateTime StartTime { get; set; } // Start time of the simulation
     public DateTime EndTime { get; set; } // End time of the simulation
 
-    public bool IsComplete { get; set; } // Indicates if the simulation is complete
 
     // Constructors
     public SimulationResult()
     {
         CombatRounds = new List<CombatRound>();
-        IsComplete = false; // Simulation is not complete initially
     }
 }

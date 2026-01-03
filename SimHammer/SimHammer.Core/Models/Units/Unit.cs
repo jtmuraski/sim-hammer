@@ -9,6 +9,8 @@ namespace SimHammer.Core.Models.Units
     public class Unit
     {
         public string Name { get; set; }
+        public string? Faction { get; set; }
+        public string? Subfaction { get; set; }
         public int Movement { get; set; } // in inches
         public int Strength { get; set; }
         public int Toughness { get; set; }
@@ -20,6 +22,11 @@ namespace SimHammer.Core.Models.Units
         public int ModelCount { get; set; } = 1; // Default to 1 model, can be adjusted for units with multiple models
         public List<MeleeWeapon> MeleeWeapons { get; set; } = new List<MeleeWeapon>();
         public List<RangedWeapon> RangedWeapons { get; set; } = new List<RangedWeapon>();
+
+        public Unit()
+        {
+        
+        }
         public Unit(string name, int movement, int weaponSkill, int ballisticSkill, int strength, int toughness, int wounds, int attacks, int leadership, int save, int invuln, int modelCount)
         {
             Name = name;

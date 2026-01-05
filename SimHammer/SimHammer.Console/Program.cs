@@ -16,7 +16,6 @@ Unit attacker = new Unit()
     Strength = 3,
     Toughness = 4,
     Wounds = 2,
-    Attacks = 3,
     Leadership = 8,
     Save = 4,
     InvulnSave = 0,
@@ -25,7 +24,7 @@ Unit attacker = new Unit()
     RangedWeapons = new List<RangedWeapon>(),
 };
 attacker.MeleeWeapons.Add(new MeleeWeapon("Knife", 0, 2, 2, 0, 1));
-attacker.RangedWeapons.Add(new RangedWeapon("Bolter", 2, 5, 1, 2, 2, 10));
+attacker.RangedWeapons.Add(new RangedWeapon("Bolter", 2, 5, 1, 2, 2,2, 10));
 
 Unit defender = new Unit()
 {
@@ -36,7 +35,6 @@ Unit defender = new Unit()
     Strength = 3,
     Toughness = 4,
     Wounds = 2,
-    Attacks = 3,
     Leadership = 8,
     Save = 4,
     InvulnSave = 0,
@@ -45,7 +43,7 @@ Unit defender = new Unit()
     RangedWeapons = new List<RangedWeapon>(),
 };
 defender.MeleeWeapons.Add(new MeleeWeapon("Bayonet", 0, 1, 2, 0, 1));
-defender.RangedWeapons.Add(new RangedWeapon("Lasgun", 24, 1, 3, 0, 1, 20));
+defender.RangedWeapons.Add(new RangedWeapon("Lasgun", 24, 1, 3, 0, 1,1, 20));
 
 Console.WriteLine("Attacking and Defending unit has been built");
 
@@ -53,4 +51,18 @@ Console.Write("Beginning Simulation...");
 
 SimulationService sim = new SimulationService();
 sim.BeginSimulation(attacker, defender, 5, false);
+
+Console.WriteLine("Simulation has been completed");
+foreach(var result in sim.SimResult.CombatRounds)
+{
+    Console.WriteLine($"=======Round {result.SimNumber}========");
+    Console.WriteLine($"Total Attacks Made: {result.TotalAttacksMade}");
+    Console.WriteLine($"Total Hits SCored: {result.TotalHits}");
+    Console.WriteLine($"Total Saves Made: {result.TotalSavesMade}");
+    Console.WriteLine($"Total InvulnSaves Made: {result.TotalInvulnSavesMade}");
+    Console.WriteLine($"Total Damage Dealt: {result.TotalDamageDealt}");
+    Console.WriteLine($"Models Kiled: {result.ModelsKilled}");
+    Console.WriteLine("========================================");
+}
+Console.ReadLine();
 

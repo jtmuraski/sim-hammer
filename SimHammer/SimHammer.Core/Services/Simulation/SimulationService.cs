@@ -11,7 +11,7 @@ namespace SimHammer.Core.Services.Simulation;
 public class SimulationService : ISimulationService
 {
     // ---Fields---
-    SimulationResult SimResult { get;set ; }
+    public SimulationResult SimResult { get;set ; }
     bool IsSimulationComplete { get; set; }
 
     // These functions will manage the flow of the combat simulation
@@ -24,7 +24,7 @@ public class SimulationService : ISimulationService
         IsSimulationComplete = false;
     }
 
-    public SimulationResult BeginSimulation(Unit attacker, Unit defender, int rounds, bool isMelee = false)
+    public void BeginSimulation(Unit attacker, Unit defender, int rounds, bool isMelee = false)
     {
         SimResult.Attacker = attacker;
         SimResult.Defender = defender;
@@ -45,7 +45,7 @@ public class SimulationService : ISimulationService
         SimResult.TotalRounds = roundsCompleted;
         SimResult.EndTime = DateTime.Now;
 
-        return SimResult;
+        return;
     }
 
     public CombatRound SimulateRangedCombatRound(Unit attacker, Unit defender, int roundNumber)
@@ -87,9 +87,11 @@ public class SimulationService : ISimulationService
                     }
                 }
             }
+            if (result.Hits == 0)
+                return round;
 
             // Calculate wounds inflicted for each hit
-            for (int i = 0; i <= result.Hits; i++)
+            for (int i = 0; i < result.Hits; i++)
             {
                 // Calculate what roll is needed to cause a wound
                 int resultNeeded = 0;
@@ -126,6 +128,8 @@ public class SimulationService : ISimulationService
                     result.WoundsInflicted++;
                 }
             }
+            if (result.WoundsInflicted == 0)
+                return round;
 
             // Calculate saves for each wound that was inflicted
             for (int i = 0; i < result.WoundsInflicted; i++)
@@ -138,7 +142,7 @@ public class SimulationService : ISimulationService
                 if (saveRoll > 1 && apRollResult > defender.Save)
                 {
                     // The save has failed, so calculate the damage
-                    result.WoundsInflicted += weapon.Damage;
+                    result.DamageDealt += weapon.Damage;
                 }
                 else
                 {

@@ -6,7 +6,7 @@ namespace SimHammer.Core.Services.Interfaces;
 
 public interface ISimulationService
 {
-    SimulationResult BeginSimulation(Unit attacker, Unit defender, int rounds, bool isMelee = false);
+    void BeginSimulation(Unit attacker, Unit defender, int rounds, bool isMelee = false);
     CombatRound SimulateRangedCombatRound(Unit attacker, Unit defender, int roundNumber);
     CombatRound SimulateMeleeCombatRound(Unit attacker, Unit defender, int roundNumber);
 }

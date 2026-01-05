@@ -4,6 +4,8 @@ namespace SimHammer.Core.Services.Simulation;
 
 public static class DiceRoller
 {
+    private static readonly Random _random = new Random();
+
     public static int RollD6()
     {
         return RollDice(6);
@@ -11,8 +13,7 @@ public static class DiceRoller
 
     public static int RollD6WithModifier(int modifier)
     {
-        int roll = RollDice(6);
-        return roll + modifier;
+        return RollDice(6) + modifier;
     }
 
     private static int RollDice(int sides)
@@ -22,7 +23,10 @@ public static class DiceRoller
             throw new ArgumentOutOfRangeException(nameof(sides), "Number of sides must be at least 1.");
         }
 
-        Random random = new Random();
-        return random.Next(1, sides + 1);
+        lock (_random)
+        {
+            return _random.Next(1, sides + 1);
+        }
+        
     }
 }

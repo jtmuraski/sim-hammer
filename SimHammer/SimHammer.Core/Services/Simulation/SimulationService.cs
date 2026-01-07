@@ -5,6 +5,7 @@ using System.Xml.XPath;
 using SimHammer.Core.Models.Simulation;
 using SimHammer.Core.Models.Units;
 using SimHammer.Core.Services.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace SimHammer.Core.Services.Simulation;
 

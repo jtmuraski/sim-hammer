@@ -13,7 +13,7 @@ public static class DiceRoller
 
     public static int RollD6WithModifier(int modifier)
     {
-        return RollDice(6) + modifier;
+        return RollD6() + modifier;
     }
 
     private static int RollDice(int sides)

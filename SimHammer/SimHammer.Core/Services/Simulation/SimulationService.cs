@@ -73,6 +73,7 @@ public class SimulationService : ISimulationService
             _logger.LogInformation($"Number of attacks with weapon: {numAttacks}");
 
             // foreach attack, determine if it hits, causes a wound and then does damage
+            result.AttacksMade = numAttacks;
             result.Hits = RollForHits(weapon.Attacks * weapon.Quantity, weapon.BallisticSkill);
 
 
@@ -80,7 +81,7 @@ public class SimulationService : ISimulationService
             if (result.Hits == 0)
             {
                 _logger.LogInformation("No hits were recorded. Ending this weapon attack");
-                return round;
+                continue;
             }
 
             _logger.LogInformation("Checking for wounds inflicted");
@@ -92,7 +93,7 @@ public class SimulationService : ISimulationService
             if (result.WoundsInflicted == 0)
             {
                 _logger.LogInformation("No wounds were inflicted. Ending this weapon attack");
-                return round;
+                continue;
             }
             _logger.LogInformation($"Wounds inflicted calculation completed. Total Wounds: {result.WoundsInflicted}");
 

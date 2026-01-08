@@ -73,30 +73,8 @@ public class SimulationService : ISimulationService
             _logger.LogInformation($"Number of attacks with weapon: {numAttacks}");
 
             // foreach attack, determine if it hits, causes a wound and then does damage
-            _logger.LogInformation($"Roll needed for a hit: {weapon.BallisticSkill}");
-            for (int i = 1; i <= numAttacks; i++)
-            {
-                _logger.LogInformation($"--Simulating attack {i} with weapon {weapon.Name}--");
-                result.AttacksMade++;
+            result.Hits = RollForHits(weapon.Attacks * weapon.Quantity, weapon.BallisticSkill);
 
-                // Determine the number of hits and wounds from this weapon
-                int hitRoll = DiceRoller.RollD6();
-                _logger.LogInformation($"Hit roll: {hitRoll}");
-                if (hitRoll == 6)
-                {
-                    _logger.LogInformation("Roll is an automatic hit");
-                    result.Hits++;
-                }
-                else
-                {
-                    // Compare the Strength of the weapon against the Toughness of the defender
-                    if (hitRoll >= weapon.BallisticSkill)
-                    {
-                        _logger.LogInformation("Roll is a hit");
-                        result.Hits++;
-                    }
-                }
-            }
 
             _logger.LogInformation($"Hit Rolls completed. Total hits: {result.Hits}");
             if (result.Hits == 0)
@@ -106,47 +84,11 @@ public class SimulationService : ISimulationService
             }
 
             _logger.LogInformation("Checking for wounds inflicted");
-            // Calculate what roll is needed to cause a wound
-            int resultNeeded = 0;
-            if (weapon.Strength >= (defender.Toughness * 2))
-            {
-                resultNeeded = 2; // Wound on 2+ if Strength is double Toughness
-            }
-            else if (weapon.Strength > defender.Toughness)
-            {
-                resultNeeded = 3; // Wound on 3+ if Strength is greater than Toughness
-            }
-            else if (weapon.Strength == defender.Toughness)
-            {
-                resultNeeded = 4; // Wound on 4+ if Strength equals Toughness
-            }
-            else if (weapon.Strength < defender.Toughness)
-            {
-                // Wound on 5+ if Strength is less than Toughness
-                resultNeeded = 5;
-            }
-            else
-            {
-                resultNeeded = 6; // Wound on 5+ if Strength is less than Toughness
-            }
+            int resultNeeded = CalculateRollToWound(weapon.Strength, defender.Toughness);
+           
             _logger.LogInformation($"With a weapon strength of {weapon.Strength} and a defender toughness of {defender.Toughness} the wound roll needed: {resultNeeded}");
-
-            // For each hit, roll to see if it causes a wound
-            for (int i = 0; i < result.Hits; i++)
-            {
-                int woundRoll = DiceRoller.RollD6();
-                _logger.LogInformation($"Wound roll: {woundRoll}");
-                if (woundRoll == 6)
-                {
-                    _logger.LogInformation("Roll is an automatic wound");
-                    result.WoundsInflicted++;
-                }
-                else if (woundRoll >= resultNeeded)
-                {
-                    _logger.LogInformation("Roll causes a wound");
-                    result.WoundsInflicted++;
-                }
-            }
+            result.WoundsInflicted = RollForWounds(result.Hits, resultNeeded);
+            
             if (result.WoundsInflicted == 0)
             {
                 _logger.LogInformation("No wounds were inflicted. Ending this weapon attack");
@@ -156,32 +98,10 @@ public class SimulationService : ISimulationService
 
             // Calculate saves for each wound that was inflicted
             _logger.LogInformation("Calculating saves for wounds inflicted");
-            for (int i = 0; i < result.WoundsInflicted; i++)
-            {
-                // If a wound was caused, roll for saves. If the defender has an invulnerable save, determine whether to use
-                // the Invuln save or regular save (if Invuln < (Save - weapon.AP))
-                int saveRoll = DiceRoller.RollD6(); ;
-                _logger.LogInformation($"Save roll: {saveRoll}");
 
-                int apRollResult = saveRoll + weapon.ArmourPiercing;
-                _logger.LogInformation($"Save roll after applying Armour Piercing ({weapon.ArmourPiercing}): {apRollResult}");
-
-                if(saveRoll == 1)
-                {
-                    _logger.LogInformation("Save roll is a 1. Automatic failed save.");
-                    result.DamageDealt += weapon.Damage;
-                }
-                else if(apRollResult < defender.Save)
-                {
-                    _logger.LogInformation("Save has failed. Applying damage.");
-                    result.DamageDealt += weapon.Damage;
-                }
-                else
-                {
-                    _logger.LogInformation("Save successful. No damage applied.");
-                    result.SavesMade++;
-                }
-            }
+            result.SavesMade = RollForSaves(result.WoundsInflicted, weapon, defender, out int damageDealt);
+            result.DamageDealt = damageDealt;
+            
 
             round.WeaponResults.Add(result);
             _logger.LogInformation($"==Completed simulation for weapon {weapon.Name}==");
@@ -213,5 +133,114 @@ public class SimulationService : ISimulationService
         // For each attack, calculate hits, wounds, saves, etc.
 
         return round;
+    }
+
+    public int RollForHits(int numAttacks, int skillLevel)
+    {
+        _logger.LogInformation($"Roll needed for a hit: {skillLevel}");
+        int totalHits = 0;
+        for (int i = 1; i <= numAttacks; i++)
+        {
+            // Determine the number of hits and wounds from this weapon
+            int hitRoll = DiceRoller.RollD6();
+            _logger.LogInformation($"Hit roll: {hitRoll}");
+            if (hitRoll == 6)
+            {
+                _logger.LogInformation("Roll is an automatic hit");
+                totalHits++;
+            }
+            else
+            {
+                // Compare the Strength of the weapon against the Toughness of the defender
+                if (hitRoll >= skillLevel)
+                {
+                    _logger.LogInformation("Roll is a hit");
+                    totalHits++;
+                }
+            }
+        }
+
+        return totalHits;
+    }
+
+    private int CalculateRollToWound(int weaponStrength, int defenderToughness)
+    {
+        if (weaponStrength >= (defenderToughness * 2))
+        {
+            return 2; // Wound on 2+ if Strength is double Toughness
+        }
+        else if (weaponStrength > defenderToughness)
+        {
+            return 3; // Wound on 3+ if Strength is greater than Toughness
+        }
+        else if (weaponStrength == defenderToughness)
+        {
+            return 4; // Wound on 4+ if Strength equals Toughness
+        }
+        else if (weaponStrength < defenderToughness)
+        {
+            // Wound on 5+ if Strength is less than Toughness
+            return 5;
+        }
+        else
+        {
+            return 6; 
+        }
+    }
+
+    private int RollForWounds(int numHits, int rollNeeded)
+    {
+        int woundsInflicted = 0;   
+        for (int i = 0; i < numHits; i++)
+        {
+            int woundRoll = DiceRoller.RollD6();
+            _logger.LogInformation($"Wound roll: {woundRoll}");
+            if (woundRoll == 6)
+            {
+                _logger.LogInformation("Roll is an automatic wound");
+                woundsInflicted++;
+            }
+            else if (woundRoll >= rollNeeded)
+            {
+                _logger.LogInformation("Roll causes a wound");
+                woundsInflicted++;
+            }
+        }
+
+        return woundsInflicted;
+    }
+
+    private int RollForSaves(int woundsInflicted, RangedWeapon weapon, Unit defender, out int damageDealt)
+    {
+        int savesMade = 0;
+        damageDealt = 0;
+        for (int i = 0; i < woundsInflicted; i++)
+        {
+            // If a wound was caused, roll for saves. If the defender has an invulnerable save, determine whether to use
+            // the Invuln save or regular save (if Invuln < (Save - weapon.AP))
+            int saveRoll = DiceRoller.RollD6(); ;
+            _logger.LogInformation($"Save roll: {saveRoll}");
+
+            int apRollResult = saveRoll + weapon.ArmourPiercing;
+            _logger.LogInformation($"Save roll after applying Armour Piercing ({weapon.ArmourPiercing}): {apRollResult}");
+
+            if (saveRoll == 1)
+            {
+                _logger.LogInformation("Save roll is a 1. Automatic failed save.");
+                damageDealt += weapon.Damage;
+            }
+            else if (apRollResult < defender.Save)
+            {
+                _logger.LogInformation("Save has failed. Applying damage.");
+               damageDealt += weapon.Damage;
+            }
+            else
+            {
+                _logger.LogInformation("Save successful. No damage applied.");
+                savesMade++;
+            }
+        }
+
+        return savesMade;
     }
 }

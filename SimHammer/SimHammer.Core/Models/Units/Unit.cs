@@ -13,7 +13,6 @@ namespace SimHammer.Core.Models.Units
         public string? Faction { get; set; }
         public string? Subfaction { get; set; }
         public int Movement { get; set; } // in inches
-        public int Strength { get; set; }
         public int Toughness { get; set; }
         public int Wounds { get; set; }
         public int Leadership { get; set; }
@@ -27,11 +26,10 @@ namespace SimHammer.Core.Models.Units
         public Unit()
         {
         }
-        public Unit(string name, int movement, int weaponSkill, int ballisticSkill, int strength, int toughness, int wounds, int leadership, int save, int invuln, int modelCount)
+        public Unit(string name, int movement, int strength, int toughness, int wounds, int leadership, int save, int invuln, int modelCount)
         {
             Name = name;
             Movement = movement;
-            Strength = strength;
             Toughness = toughness;
             Wounds = wounds;
             Leadership = leadership;

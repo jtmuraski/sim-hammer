@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SimHammer.Core.Services.Interfaces
 {
-    internal class IRangedCombatService
+    public interface IRangedCombatService
     {
     }
 }

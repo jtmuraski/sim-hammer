@@ -167,7 +167,7 @@
 //            unit.ModelCount = modelCount;
 
 //            bool addRangedWeapons = AnsiConsole.Console.Confirm("Would you like to add ranged weapons to this unit?");
-//            while(addRangedWeapons)
+//            while (addRangedWeapons)
 //            {
 //                var weaponName = AnsiConsole.Prompt(
 //                    new TextPrompt<string>("Ranged Weapon Name?")
@@ -268,7 +268,7 @@
 //                rangedTable.AddColumn(new TableColumn("[bold]Damage[/]").Centered());
 //                rangedTable.AddColumn(new TableColumn("[bold]Quantity[/]").Centered());
 
-//                foreach(var weapon in unit.RangedWeapons)
+//                foreach (var weapon in unit.RangedWeapons)
 //                {
 //                    rangedTable.AddRow(
 //                        weapon.Name,

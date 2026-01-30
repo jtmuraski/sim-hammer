@@ -4,6 +4,7 @@ using SimHammer.Core.Models.Units;
 using SimHammer.Core.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,11 +14,15 @@ namespace SimHammer.Core.Services.Simulation
     public class RangedCombatService : IRangedCombatService
     {
         // ---Properties---
-        ILogger<RangedCombatService> _logger;
+        private ILogger<IRangedCombatService> _logger;
 
         // ---FIelds---
 
         // ---Constructors---
+        public RangedCombatService(ILogger<IRangedCombatService> logger)
+        {
+            _logger = logger;
+        }
 
         // ---Combat Methods---
         /// <summary>
@@ -97,7 +102,7 @@ namespace SimHammer.Core.Services.Simulation
             return round;
         }
 
-        public int RollForHits(int numAttacks, int skillLevel)
+        internal int RollForHits(int numAttacks, int skillLevel)
         {
             _logger.LogInformation($"Roll needed for a hit: {skillLevel}");
             int totalHits = 0;
@@ -125,9 +130,9 @@ namespace SimHammer.Core.Services.Simulation
             return totalHits;
         }
 
-        public int CalculateRollToWound(int weaponStrength, int defenderToughness)
+        internal int CalculateRollToWound(int weaponStrength, int defenderToughness)
         {
-            if (weaponStrength >= (defenderToughness * 2))
+            if (weaponStrength >= (defenderToughness * 2.00))
             {
                 return 2; // Wound on 2+ if Strength is double Toughness
             }
@@ -139,18 +144,19 @@ namespace SimHammer.Core.Services.Simulation
             {
                 return 4; // Wound on 4+ if Strength equals Toughness
             }
-            else if (weaponStrength < defenderToughness)
+            else if (weaponStrength < (defenderToughness / 2.00))
             {
-                // Wound on 5+ if Strength is less than Toughness
-                return 5;
+                // Wound on 6+ if Strength is less than half the Toughness
+                return 6;
             }
             else
             {
-                return 6;
+                // Wound on a 5+ if strength is less than Toughness
+                return 5;
             }
         }
 
-        public int RollForWounds(int numHits, int rollNeeded)
+        internal int RollForWounds(int numHits, int rollNeeded)
         {
             int woundsInflicted = 0;
             for (int i = 0; i < numHits; i++)
@@ -172,7 +178,7 @@ namespace SimHammer.Core.Services.Simulation
             return woundsInflicted;
         }
 
-        public int RollForSaves(int woundsInflicted, RangedWeapon weapon, Unit defender, out int damageDealt)
+        internal int RollForSaves(int woundsInflicted, RangedWeapon weapon, Unit defender, out int damageDealt)
         {
             int savesMade = 0;
             damageDealt = 0;

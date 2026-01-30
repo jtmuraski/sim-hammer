@@ -15,13 +15,13 @@ public class SimulationService : ISimulationService
     public SimulationResult SimResult { get;set ; }
     bool IsSimulationComplete { get; set; }
     private ILogger<SimulationService> _logger;
-    private IRangedCombatService _rangedCombatServicer;
+    private IRangedCombatService _rangedCombatService;
     
     // ---Contructors---
     public SimulationService(ILogger<SimulationService> logger, IRangedCombatService rangedCombatService)
     {
         _logger = logger;
-        _rangedCombatServicer = rangedCombatService;
+        _rangedCombatService = rangedCombatService;
         SimResult = new SimulationResult();
         IsSimulationComplete = false;
     }
@@ -41,8 +41,8 @@ public class SimulationService : ISimulationService
 
         for (int i = 1; i <= rounds; i++)
         {
-            SimResult.CombatRounds.Add(SimResult.IsMeleeCombat ? SimulateMeleeCombatRound(attacker, defender, i) :
-                                                           SimulateRangedCombatRound(attacker, defender, i));
+            SimResult.CombatRounds.Add(SimResult.IsMeleeCombat ? SimulateMeleeCombatRound(attacker, defender, i) : 
+                                                                _rangedCombatService.SimulateRangedCombatRound(attacker, defender, i));
             roundsCompleted++;
         }
 

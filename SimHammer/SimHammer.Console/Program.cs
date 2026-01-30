@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using SimHammer.Core.Services.Interfaces;
 
 // -------Set up Logging for console app-------
 string timeStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -16,8 +17,10 @@ var serviceProvider = new ServiceCollection()
            builder.AddFile(logFilePath)
                   .SetMinimumLevel(LogLevel.Information);
        })
+    .AddSingleton<IRangedCombatService, RangedCombatService>()
     .AddSingleton<SimulationService>()
     .BuildServiceProvider();
+
 var logger = serviceProvider.GetService<ILogger<Program>>();
 
 Console.WriteLine("Building units...");
@@ -63,7 +66,8 @@ Console.WriteLine("Attacking and Defending unit has been built");
 Console.Write("Beginning Simulation...");
 
 var simLogger = serviceProvider.GetService<ILogger<SimulationService>>();
-SimulationService sim = new SimulationService(simLogger);
+var sim = serviceProvider.GetRequiredService<SimulationService>();
+
 sim.BeginSimulation(attacker, defender, 1000, false);
 
 Console.WriteLine("Simulation has been completed");

@@ -18,6 +18,7 @@ var serviceProvider = new ServiceCollection()
                   .SetMinimumLevel(LogLevel.Information);
        })
     .AddSingleton<IRangedCombatService, RangedCombatService>()
+    .AddSingleton<IDiceRoller, DiceRoller>()
     .AddSingleton<SimulationService>()
     .BuildServiceProvider();
 

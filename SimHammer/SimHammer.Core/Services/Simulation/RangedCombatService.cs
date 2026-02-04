@@ -14,14 +14,16 @@ namespace SimHammer.Core.Services.Simulation
     public class RangedCombatService : IRangedCombatService
     {
         // ---Properties---
-        private ILogger<IRangedCombatService> _logger;
+        private readonly ILogger<IRangedCombatService> _logger;
+        private readonly IDiceRoller _diceRoller;
 
         // ---FIelds---
 
         // ---Constructors---
-        public RangedCombatService(ILogger<IRangedCombatService> logger)
+        public RangedCombatService(ILogger<IRangedCombatService> logger, IDiceRoller diceRoller)
         {
             _logger = logger;
+            _diceRoller = diceRoller;
         }
 
         // ---Combat Methods---

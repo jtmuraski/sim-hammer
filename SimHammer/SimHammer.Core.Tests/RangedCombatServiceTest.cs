@@ -10,7 +10,7 @@ namespace SimHammer.Core.Tests
 {
     public class RangedCombatServiceTest
     {
-        // ***** Calculate Roll To Wound *****
+        #region Calculate Roll To Wound Tests
         [Fact]
         public void CalculateRollToWound_Return2()
         {
@@ -90,5 +90,12 @@ namespace SimHammer.Core.Tests
             // Assert
             Assert.Equal(6, result);
         }
+
+        #endregion
+
+        #region Roll For Hits Tests
+
+
+        #endregion
     }
 }

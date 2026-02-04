@@ -1,22 +1,23 @@
 using System;
+using SimHammer.Core.Services.Interfaces;
 
 namespace SimHammer.Core.Services.Simulation;
 
-public static class DiceRoller
+public  class DiceRoller : IDiceRoller
 {
     private static readonly Random _random = new Random();
 
-    public static int RollD6()
+    public  int RollD6()
     {
         return RollDice(6);
     }
 
-    public static int RollD6WithModifier(int modifier)
+    public int RollD6WithModifier(int modifier)
     {
         return RollD6() + modifier;
     }
 
-    private static int RollDice(int sides)
+    private int RollDice(int sides)
     {
         if (sides < 1)
         {

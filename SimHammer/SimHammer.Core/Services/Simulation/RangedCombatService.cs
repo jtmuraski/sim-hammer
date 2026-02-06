@@ -111,12 +111,16 @@ namespace SimHammer.Core.Services.Simulation
             for (int i = 1; i <= numAttacks; i++)
             {
                 // Determine the number of hits and wounds from this weapon
-                int hitRoll = DiceRoller.RollD6();
+                int hitRoll = _diceRoller.RollD6();
                 _logger.LogInformation($"Hit roll: {hitRoll}");
                 if (hitRoll == 6)
                 {
                     _logger.LogInformation("Roll is an automatic hit");
                     totalHits++;
+                }
+                else if (hitRoll == 1)
+                {
+                    _logger.LogInformation("Roll is an automatic miss");
                 }
                 else
                 {
@@ -163,7 +167,7 @@ namespace SimHammer.Core.Services.Simulation
             int woundsInflicted = 0;
             for (int i = 0; i < numHits; i++)
             {
-                int woundRoll = DiceRoller.RollD6();
+                int woundRoll = _diceRoller.RollD6();
                 _logger.LogInformation($"Wound roll: {woundRoll}");
                 if (woundRoll == 6)
                 {
@@ -188,7 +192,7 @@ namespace SimHammer.Core.Services.Simulation
             {
                 // If a wound was caused, roll for saves. If the defender has an invulnerable save, determine whether to use
                 // the Invuln save or regular save (if Invuln < (Save - weapon.AP))
-                int saveRoll = DiceRoller.RollD6(); ;
+                int saveRoll = _diceRoller.RollD6(); ;
                 _logger.LogInformation($"Save roll: {saveRoll}");
 
                 int apRollResult = saveRoll + weapon.ArmourPiercing;

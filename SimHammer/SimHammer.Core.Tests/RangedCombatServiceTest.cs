@@ -22,7 +22,7 @@ namespace SimHammer.Core.Tests
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollD6()).Returns(6);
 
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
 
@@ -40,7 +40,7 @@ namespace SimHammer.Core.Tests
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollD6()).Returns(1);
 
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -58,7 +58,7 @@ namespace SimHammer.Core.Tests
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollD6()).Returns(4);
 
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -76,7 +76,7 @@ namespace SimHammer.Core.Tests
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollD6()).Returns(5);
 
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -94,7 +94,7 @@ namespace SimHammer.Core.Tests
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollD6()).Returns(2);
 
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -138,7 +138,7 @@ namespace SimHammer.Core.Tests
             int weaponStrength = 11;
             int defenderToughness = 5;
             var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -155,7 +155,7 @@ namespace SimHammer.Core.Tests
             int weaponStrength = 7;
             int defenderToughness = 5;
             var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -172,7 +172,7 @@ namespace SimHammer.Core.Tests
             int weaponStrength = 5;
             int defenderToughness = 5;
             var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -189,7 +189,7 @@ namespace SimHammer.Core.Tests
             int weaponStrength = 4;
             int defenderToughness = 5;
             var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
@@ -206,7 +206,7 @@ namespace SimHammer.Core.Tests
             int weaponStrength = 2;
             int defenderToughness = 5;
             var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<RangedCombatService>();
+            var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act

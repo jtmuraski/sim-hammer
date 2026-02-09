@@ -17,7 +17,7 @@ namespace SimHammer.Core.Services.Simulation
         private readonly ILogger<IRangedCombatService> _logger;
         private readonly IDiceRoller _diceRoller;
 
-        // ---FIelds---
+        // ---Fields---
 
         // ---Constructors---
         public RangedCombatService(ILogger<IRangedCombatService> logger, IDiceRoller diceRoller)
@@ -85,8 +85,8 @@ namespace SimHammer.Core.Services.Simulation
                 // Calculate saves for each wound that was inflicted
                 _logger.LogInformation("Calculating saves for wounds inflicted");
 
-                result.SavesMade = RollForSaves(result.WoundsInflicted, weapon, defender, out int damageDealt);
-                result.DamageDealt = damageDealt;
+                result.SavesMade = RollForSaves(result.WoundsInflicted, weapon, defender);
+                result.DamageDealt = CalculateDamage(weapon, (result.WoundsInflicted - result.SavesMade));
 
 
                 round.WeaponResults.Add(result);
@@ -184,14 +184,19 @@ namespace SimHammer.Core.Services.Simulation
             return woundsInflicted;
         }
 
-        internal int RollForSaves(int woundsInflicted, RangedWeapon weapon, Unit defender, out int damageDealt)
+        internal int RollForSaves(int woundsInflicted, RangedWeapon weapon, Unit defender)
         {
             int savesMade = 0;
-            damageDealt = 0;
             for (int i = 0; i < woundsInflicted; i++)
             {
                 // If a wound was caused, roll for saves. If the defender has an invulnerable save, determine whether to use
                 // the Invuln save or regular save (if Invuln < (Save - weapon.AP))
+                int saveToUse = defender.Save;
+                if (defender.InvulnSave > 0 & defender.InvulnSave <= (defender.Save - weapon.ArmourPiercing))
+                {
+                    saveToUse = defender.InvulnSave;
+                }
+
                 int saveRoll = _diceRoller.RollD6(); ;
                 _logger.LogInformation($"Save roll: {saveRoll}");
 
@@ -201,14 +206,8 @@ namespace SimHammer.Core.Services.Simulation
                 if (saveRoll == 1)
                 {
                     _logger.LogInformation("Save roll is a 1. Automatic failed save.");
-                    damageDealt += weapon.Damage;
                 }
-                else if (apRollResult < defender.Save)
-                {
-                    _logger.LogInformation("Save has failed. Applying damage.");
-                    damageDealt += weapon.Damage;
-                }
-                else
+                else if (apRollResult >= saveToUse)
                 {
                     _logger.LogInformation("Save successful. No damage applied.");
                     savesMade++;
@@ -216,6 +215,11 @@ namespace SimHammer.Core.Services.Simulation
             }
 
             return savesMade;
+        }
+
+        internal int CalculateDamage(RangedWeapon weapon, int unsavedWounds)
+        {
+            return weapon.Damage * unsavedWounds;
         }
     }
 }

@@ -287,7 +287,7 @@ namespace SimHammer.Core.Tests
             var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
             var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 4 };
+            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 3 }; // Since the Invuln save is better(lower) than the normal save, it should be used instead
 
             // Act
             int saves = service.RollForSaves(1, attacker, defender);
@@ -301,12 +301,12 @@ namespace SimHammer.Core.Tests
         {
             // Arrange
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(3)
+            mockRoller.Setup(x => x.RollD6()).Returns(2);
 
             var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
             var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 4 };
+            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 3 };
 
             // Act
             int saves = service.RollForSaves(1, attacker, defender);
@@ -324,14 +324,31 @@ namespace SimHammer.Core.Tests
 
             var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService(logger, mockRoller.Object);
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -5, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 4, InvulnSave = 4 };
+            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -3, 1, 10);
+            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 2, InvulnSave = 0 };
 
             // Act
             int saves = service.RollForSaves(1, attacker, defender);
 
             // Assert
             Assert.Equal(0, saves);
+        }
+
+        // Test Damage Calculation
+        [Fact]
+        public void CalculateDamagetest ()
+        {
+            // Arrange
+            var mockRoller = new Mock<IDiceRoller>();
+            var logger = new NullLogger<IRangedCombatService>();
+            var service = new RangedCombatService(logger, mockRoller.Object);
+            var rangedWeapon = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
+
+            // Act
+            int damage = service.CalculateDamage(rangedWeapon, 4); 
+
+            // Assert
+            Assert.Equal(4, damage);
         }
 
         #endregion

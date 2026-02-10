@@ -19,6 +19,7 @@ namespace SimHammer.Core.Tests
         [Fact]
         public void RollForHitTest_1Attack_AutoHitOn6()
         {
+            // Arrnage
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollD6()).Returns(6);
 
@@ -100,29 +101,30 @@ namespace SimHammer.Core.Tests
             // Act
             int hits = service.RollForHits(1, 5);
 
-            // Arrange
+            // Assert
             Assert.Equal(0, hits);
         }
 
         // Test condictions with multiple attacks
         [Theory]
-        [InlineData(1,0)]
-        [InlineData(2,0)]
-        [InlineData(3,1)]
-        [InlineData(4,1)]
-        [InlineData(5,1)]
-        [InlineData(6,1)]
-        public void RollForHitsTest_6Attacks_3Hits(int diceRoll, int expectedHits)
+        [InlineData(new int[] { 1, 2, 3, 4, 5, 6 }, 3)] // 3 hits (4,5,6)
+        [InlineData(new int[] { 1, 1, 1 }, 0)] // All auto misses
+        [InlineData(new int[] { 6,6,6,6}, 4)] // All auto hits)
+        public void RollForHitsTest_MultipleAttacks_VariousHits(int[] rolls, int expectedHits)
         {
             // Arrange
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.SetupSequence(x => x.RollD6()).Returns(diceRoll);
+            var sequence = mockRoller.SetupSequence(x => x.RollD6());
+            foreach (var roll in rolls)
+            {
+                sequence.Returns(roll);
+            }
 
             var logger = new NullLogger<IRangedCombatService>();
             var service = new RangedCombatService (logger, mockRoller.Object);
 
             // Act
-            int hits = service.RollForHits(1, 3);
+            int hits = service.RollForHits(rolls.Length, 4);
 
             // Assert
             Assert.Equal(expectedHits, hits);
@@ -349,6 +351,31 @@ namespace SimHammer.Core.Tests
 
             // Assert
             Assert.Equal(4, damage);
+        }
+
+        #endregion
+
+
+        #region Test CalculateRollToWound
+        [Theory]
+        [InlineData(5,2,2)]
+        [InlineData(5,4,3)]
+        [InlineData(4,4,4)]
+        [InlineData(2,6,6)]
+        [InlineData(3,4,5)]
+        public void CalculateRollToWoundTest_VariousStrengths(int weaponStrength, int defenderToughness, int expectedRollToWound)
+        {
+            // Arrange
+            var mockRoller = new Mock<IDiceRoller>();
+            var logger = new NullLogger<IRangedCombatService>();
+
+            var service = new RangedCombatService(logger, mockRoller.Object);
+
+            // Act
+            int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
+
+            // Arrange
+            Assert.Equal(expectedRollToWound, result);
         }
 
         #endregion

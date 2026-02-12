@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using SimHammer.Core.Services.Interfaces;
 using Moq;
 using SimHammer.Core.Models.Units;
+using SimHammer.Core.Models.Simulation;
 
 namespace SimHammer.Core.Tests
 {
@@ -109,7 +110,7 @@ namespace SimHammer.Core.Tests
         [Theory]
         [InlineData(new int[] { 1, 2, 3, 4, 5, 6 }, 3)] // 3 hits (4,5,6)
         [InlineData(new int[] { 1, 1, 1 }, 0)] // All auto misses
-        [InlineData(new int[] { 6,6,6,6}, 4)] // All auto hits)
+        [InlineData(new int[] { 6, 6, 6, 6 }, 4)] // All auto hits)
         public void RollForHitsTest_MultipleAttacks_VariousHits(int[] rolls, int expectedHits)
         {
             // Arrange
@@ -121,7 +122,7 @@ namespace SimHammer.Core.Tests
             }
 
             var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService (logger, mockRoller.Object);
+            var service = new RangedCombatService(logger, mockRoller.Object);
 
             // Act
             int hits = service.RollForHits(rolls.Length, 4);
@@ -338,7 +339,7 @@ namespace SimHammer.Core.Tests
 
         // Test Damage Calculation
         [Fact]
-        public void CalculateDamagetest ()
+        public void CalculateDamagetest()
         {
             // Arrange
             var mockRoller = new Mock<IDiceRoller>();
@@ -347,7 +348,7 @@ namespace SimHammer.Core.Tests
             var rangedWeapon = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
 
             // Act
-            int damage = service.CalculateDamage(rangedWeapon, 4); 
+            int damage = service.CalculateDamage(rangedWeapon, 4);
 
             // Assert
             Assert.Equal(4, damage);
@@ -358,11 +359,11 @@ namespace SimHammer.Core.Tests
 
         #region Test CalculateRollToWound
         [Theory]
-        [InlineData(5,2,2)]
-        [InlineData(5,4,3)]
-        [InlineData(4,4,4)]
-        [InlineData(2,6,6)]
-        [InlineData(3,4,5)]
+        [InlineData(5, 2, 2)]
+        [InlineData(5, 4, 3)]
+        [InlineData(4, 4, 4)]
+        [InlineData(2, 6, 6)]
+        [InlineData(3, 4, 5)]
         public void CalculateRollToWoundTest_VariousStrengths(int weaponStrength, int defenderToughness, int expectedRollToWound)
         {
             // Arrange
@@ -374,8 +375,78 @@ namespace SimHammer.Core.Tests
             // Act
             int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
 
-            // Arrange
+            // Assert
             Assert.Equal(expectedRollToWound, result);
+        }
+
+        #endregion
+
+        #region Test RollForWounds
+
+        [Theory]
+        [InlineData(1, 3, new int[] { 6 }, 1)] // Auto wound on 6
+        [InlineData(1, 3, new int[] { 5 }, 1)] // 1 Wound caused on roll greater than needed
+        [InlineData(1, 3, new int[] { 3 }, 1)] // 1 Wound caused on roll equal to needed roll
+        [InlineData(1, 3, new int[] { 1 }, 0)] // No wound casued on roll less than needed
+        [InlineData(2, 3, new int[] { 5, 2 }, 1)] // 1 wound caused on 2 hits, 1 success and 1 fail
+        public void RollForWoundsTest_VariousRollNeeded(int numHits, int rollNeeded, int[] diceRolls, int woundsExpected)
+        {
+            // Act
+            var mockRoller = new Mock<IDiceRoller>();
+            var sequence = mockRoller.SetupSequence(x => x.RollD6());
+            for(int i = 0; i < diceRolls.Length; i++)
+            {
+                sequence.Returns(diceRolls[i]);
+            }
+
+            var logger = new NullLogger<IRangedCombatService>();
+            var service = new RangedCombatService(logger, mockRoller.Object);
+
+            // Act
+            int wounds = service.RollForWounds(numHits, rollNeeded);
+
+            // Arrange
+            Assert.Equal(woundsExpected, wounds);
+        }
+
+        #endregion
+
+        #region Full SimulateRangedCombat Integration Testing
+        [Fact]
+        public void SimulateRangedCombatRoundTest_FullIntegration_1Weapon2Attacks()
+        {
+            // Arrange
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollD6())
+                // Hit Rolls (2 attacks - 1 hit, 1miss
+                .Returns(4) // Hit
+                .Returns(2) // Miss
+                // Wound Rolls (1 hit - 1 wound)
+                .Returns(5) // Wound roll success
+                // Save Rolls (1 wound - 1 failed save)
+                .Returns(2); // Save fails, damge occurs
+
+            var logger = new NullLogger<IRangedCombatService>();
+            var service = new RangedCombatService(logger, mockRoller.Object);
+
+            var attacker = new Unit() { Name = "Attacker", Toughness = 5, Save = 4, InvulnSave = 4 };
+            attacker.RangedWeapons.Add(new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 1));
+            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 4, InvulnSave = 4, Wounds = 1, ModelCount = 5 };
+
+            // Act
+            CombatRound roundResult = service.SimulateRangedCombatRound(attacker, defender, 1);
+
+            // Assert
+
+            // Check the combat round results
+            Assert.Equal(1, roundResult.SimNumber);
+
+            var weaponResult = roundResult.WeaponResults[0];
+            Assert.Equal(1, weaponResult.DamageDealt);
+            Assert.Equal(0, weaponResult.SavesMade);
+            Assert.Equal(1, weaponResult.WoundsInflicted);
+            Assert.Equal(1, weaponResult.Hits);
+            Assert.Equal(1, weaponResult.Misses());
         }
 
         #endregion

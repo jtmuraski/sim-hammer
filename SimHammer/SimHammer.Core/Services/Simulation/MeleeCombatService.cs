@@ -2,33 +2,28 @@
 using SimHammer.Core.Models.Simulation;
 using SimHammer.Core.Models.Units;
 using SimHammer.Core.Services.Interfaces;
-using CommonRolls = SimHammer.Core.Services.Simulation;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SimHammer.Core.Services.Simulation
 {
-    public class RangedCombatService : IRangedCombatService
+    public class MeleeCombatService : IMeleeCombatService
     {
         // ---Properties---
         private readonly ILogger<IRangedCombatService> _logger;
         private readonly IDiceRoller _diceRoller;
-        private readonly ICommonCombatRolls _commonCombatRolls;
 
         // ---Fields---
 
         // ---Constructors---
-        public RangedCombatService(ILogger<IRangedCombatService> logger, IDiceRoller diceRoller, ICommonCombatRolls commonCombatRolls)
-        { 
+        public MeleeCombatService(ILogger<IRangedCombatService> logger, IDiceRoller diceRoller)
+        {
             _logger = logger;
             _diceRoller = diceRoller;
-            _commonCombatRolls = commonCombatRolls; 
         }
-
         // ---Combat Methods---
         /// <summary>
         /// Being a round of Rnaged Combat between two units and return the results
@@ -51,8 +46,8 @@ namespace SimHammer.Core.Services.Simulation
 
             // Simulate the combat logic here
 
-            // Conduct combat for each ranged weapon
-            foreach (RangedWeapon weapon in attacker.RangedWeapons)
+            // Conduct combat for each melee weapon
+            foreach (MeleeWeapon weapon in attacker.MeleeWeapons)
             {
                 _logger.LogInformation($"==Simulating attacks with weapon {weapon.Name}==");
                 WeaponResult result = new WeaponResult();
@@ -62,7 +57,7 @@ namespace SimHammer.Core.Services.Simulation
 
                 // foreach attack, determine if it hits, causes a wound and then does damage
                 result.AttacksMade = numAttacks;
-                result.Hits = _commonCombatRolls.RollForHits(weapon.Attacks * weapon.Quantity, weapon.BallisticSkill);
+                result.Hits = RollForHits(weapon.Attacks * weapon.Quantity, weapon.BallisticSkill);
 
 
                 _logger.LogInformation($"Hit Rolls completed. Total hits: {result.Hits}");
@@ -73,10 +68,10 @@ namespace SimHammer.Core.Services.Simulation
                 }
 
                 _logger.LogInformation("Checking for wounds inflicted");
-                int resultNeeded = _commonCombatRolls.CalculateRollToWound(weapon.Strength, defender.Toughness);
+                int resultNeeded = CalculateRollToWound(weapon.Strength, defender.Toughness);
 
                 _logger.LogInformation($"With a weapon strength of {weapon.Strength} and a defender toughness of {defender.Toughness} the wound roll needed: {resultNeeded}");
-                result.WoundsInflicted = _commonCombatRolls.RollForWounds(result.Hits, resultNeeded);
+                result.WoundsInflicted = RollForWounds(result.Hits, resultNeeded);
 
                 if (result.WoundsInflicted == 0)
                 {
@@ -88,8 +83,8 @@ namespace SimHammer.Core.Services.Simulation
                 // Calculate saves for each wound that was inflicted
                 _logger.LogInformation("Calculating saves for wounds inflicted");
 
-                result.SavesMade = _commonCombatRolls.RollForSaves(result.WoundsInflicted, weapon, defender);
-                result.DamageDealt = _commonCombatRolls.CalculateDamage(weapon, (result.WoundsInflicted - result.SavesMade));
+                result.SavesMade = RollForSaves(result.WoundsInflicted, weapon, defender);
+                result.DamageDealt = CalculateDamage(weapon, (result.WoundsInflicted - result.SavesMade));
 
 
                 round.WeaponResults.Add(result);

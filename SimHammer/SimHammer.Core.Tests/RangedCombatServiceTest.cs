@@ -14,27 +14,41 @@ namespace SimHammer.Core.Tests
 {
     public class RangedCombatServiceTest
     {
+        // ---Propeties---
+        private NullLogger<ICommonCombatRolls> _commonCombatRollsLogger;
+        private NullLogger<IRangedCombatService> _rangedLogger;
+        private Mock<IDiceRoller> _mockCombatRolls;
+        private Mock<IDiceRoller> _mockRangedRoller;
+        private CommonCombatRolls _commonCombatRolls;
+
+        public RangedCombatServiceTest()
+        {
+            _commonCombatRollsLogger = new NullLogger<ICommonCombatRolls>();
+            _rangedLogger = new NullLogger<IRangedCombatService>();
+            _mockCombatRolls = new Mock<IDiceRoller>();
+            _mockRangedRoller = new Mock<IDiceRoller>();
+        }
+
         #region Full SimulateRangedCombat Integration Testing
         [Fact]
         public void SimulateRangedCombatRoundTest_FullIntegration_1Weapon2Attacks()
         {
             // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.SetupSequence(x => x.RollD6())
+            _mockCombatRolls.SetupSequence(x => x.RollD6())
                 // Hit Rolls (2 attacks - 1 hit, 1miss
                 .Returns(4) // Hit
                 .Returns(2) // Miss
                 // Wound Rolls (1 hit - 1 wound)
                 .Returns(5) // Wound roll success
                 // Save Rolls (1 wound - 1 failed save)
-                .Returns(2); // Save fails, damge occurs
+                .Returns(2); // Save fails, damage occurs
+            _commonCombatRolls = new CommonCombatRolls(_commonCombatRollsLogger, _mockCombatRolls.Object);
 
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
+            var service = new RangedCombatService(_rangedLogger, _mockRangedRoller.Object, _commonCombatRolls);
 
             var attacker = new Unit() { Name = "Attacker", Toughness = 5, Save = 4, InvulnSave = 4 };
             attacker.RangedWeapons.Add(new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 1));
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 4, InvulnSave = 4, Wounds = 1, ModelCount = 5 };
+            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 4, HasInvulnSave = true, InvulnSave = 4, Wounds = 1, ModelCount = 5 };
 
             // Act
             CombatRound roundResult = service.SimulateRangedCombatRound(attacker, defender, 1);

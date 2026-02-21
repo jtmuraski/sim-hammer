@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Moq;
 
 namespace SimHammer.Core.Services.Simulation
 {
@@ -26,7 +27,7 @@ namespace SimHammer.Core.Services.Simulation
         { 
             _logger = logger;
             _diceRoller = diceRoller;
-            _commonCombatRolls = commonCombatRolls; 
+            _commonCombatRolls = commonCombatRolls;
         }
 
         // ---Combat Methods---
@@ -88,8 +89,8 @@ namespace SimHammer.Core.Services.Simulation
                 // Calculate saves for each wound that was inflicted
                 _logger.LogInformation("Calculating saves for wounds inflicted");
 
-                result.SavesMade = _commonCombatRolls.RollForSaves(result.WoundsInflicted, weapon, defender);
-                result.DamageDealt = _commonCombatRolls.CalculateDamage(weapon, (result.WoundsInflicted - result.SavesMade));
+                result.SavesMade = _commonCombatRolls.RollForSaves(result.WoundsInflicted, weapon.ArmourPiercing, defender);
+                result.DamageDealt = _commonCombatRolls.CalculateDamage(result.WoundsInflicted, weapon.Damage);
 
 
                 round.WeaponResults.Add(result);

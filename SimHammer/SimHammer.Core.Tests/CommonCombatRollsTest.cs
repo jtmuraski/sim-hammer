@@ -1,16 +1,31 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using Castle.Core.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using SimHammer.Core.Models.Units;
 using SimHammer.Core.Services.Interfaces;
 using SimHammer.Core.Services.Simulation;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace SimHammer.Core.Tests
 {
     public class CommonCombatRollsTest
     {
+        // ---Properties---
+        private Mock<IDiceRoller> _mockRoller;
+        private NullLogger<ICommonCombatRolls> _logger;
+
+        // ---Constructors---
+        public CommonCombatRollsTest()
+        {
+            _mockRoller = new Mock<IDiceRoller>();
+            _logger = new NullLogger<ICommonCombatRolls>();
+        }
+
+        // ---Tests---
+
         [Theory]
         [InlineData(6, 1, 1, 4)] // Hit - Auto
         [InlineData(1, 0, 1, 4)] // Miss - Auto
@@ -19,14 +34,9 @@ namespace SimHammer.Core.Tests
         [InlineData(2, 0, 1, 3)] // Miss - Roll less than Ballistic Skill Level
         public void RollForHitTest_1Attack_VariousResults(int diceRoll, int hitsExpected, int numAttacks, int ballisticSkillLevel)
         {
-            // Arrnage
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(diceRoll);
-
-            var logger = new NullLogger<ICommonCombatRolls>();
-            var service = new CommonCombatRolls(logger, mockRoller.Object);
-
-
+            // Arrange
+            var service = new CommonCombatRolls(_logger, _mockRoller.Object);
+            _mockRoller.Setup(x => x.RollD6()).Returns(diceRoll);
             // Act
             int hits = service.RollForHits(numAttacks, ballisticSkillLevel);
 
@@ -34,7 +44,7 @@ namespace SimHammer.Core.Tests
             Assert.Equal(hitsExpected, hits);
         }
 
-        // Test condictions with multiple attacks
+        // Test condictions with multiple attacks, based on a Ballistic SKill of 4. 4 was chosen as a good median value
         [Theory]
         [InlineData(new int[] { 1, 2, 3, 4, 5, 6 }, 3)] // 3 hits (4,5,6)
         [InlineData(new int[] { 1, 1, 1 }, 0)] // All auto misses
@@ -49,8 +59,8 @@ namespace SimHammer.Core.Tests
                 sequence.Returns(roll);
             }
 
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
+            var logger = new NullLogger<ICommonCombatRolls>();
+            var service = new CommonCombatRolls(logger, mockRoller.Object);
 
             // Act
             int hits = service.RollForHits(rolls.Length, 4);
@@ -58,232 +68,6 @@ namespace SimHammer.Core.Tests
             // Assert
             Assert.Equal(expectedHits, hits);
         }
-
-#endregion
-
-        #region Calculate Roll To Wound Tests
-        [Fact]
-        public void CalculateRollToWound_Return2()
-        {
-            // Arrange
-            int weaponStrength = 11;
-            int defenderToughness = 5;
-            var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-
-            // Act
-            int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
-
-            // Assert
-            Assert.Equal(2, result);
-        }
-
-        [Fact]
-        public void CalculateRollToWound_Return3()
-        {
-            // Arrange
-            int weaponStrength = 7;
-            int defenderToughness = 5;
-            var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-
-            // Act
-            int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
-
-            // Assert
-            Assert.Equal(3, result);
-        }
-
-        [Fact]
-        public void CalculateRollToWound_Return4()
-        {
-            // Arrange
-            int weaponStrength = 5;
-            int defenderToughness = 5;
-            var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-
-            // Act
-            int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
-
-            // Assert
-            Assert.Equal(4, result);
-        }
-
-        [Fact]
-        public void CalculateRollToWound_Return5()
-        {
-            // Arrange
-            int weaponStrength = 4;
-            int defenderToughness = 5;
-            var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-
-            // Act
-            int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
-
-            // Assert
-            Assert.Equal(5, result);
-        }
-
-        [Fact]
-        public void CalculateRollToWound_Return6()
-        {
-            // Arrange
-            int weaponStrength = 2;
-            int defenderToughness = 5;
-            var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-
-            // Act
-            int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
-
-            // Assert
-            Assert.Equal(6, result);
-        }
-
-        #endregion
-
-        #region Roll For Saves Test
-
-        [Fact]
-        public void RollForSavesTest_AutoFailOn1()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(1);
-
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 4 };
-
-            // Act
-            int saves = service.RollForSaves(1, attacker, defender);
-
-            // Assert
-            Assert.Equal(0, saves);
-        }
-
-        [Fact]
-        public void RollForSavesTest_SuccessfulSave()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(5);
-
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 4, InvulnSave = 4 };
-
-            // Act
-            int saves = service.RollForSaves(1, attacker, defender);
-            // Assert
-            Assert.Equal(1, saves);
-        }
-
-        [Fact]
-        public void RollForSavesTest_FailedSave()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(3);
-
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 4, InvulnSave = 4 };
-
-            // Act
-            int saves = service.RollForSaves(1, attacker, defender);
-
-            // Assert
-            Assert.Equal(0, saves);
-        }
-
-        [Fact]
-        public void RollForSavesTest_UseInvulnSave_SaveSuccessful()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(4);
-
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 3 }; // Since the Invuln save is better(lower) than the normal save, it should be used instead
-
-            // Act
-            int saves = service.RollForSaves(1, attacker, defender);
-
-            // Assert
-            Assert.Equal(1, saves);
-        }
-
-        [Fact]
-        public void RollForSavesTest_UseInvulnSave_SaveFailed()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(2);
-
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 5, InvulnSave = 3 };
-
-            // Act
-            int saves = service.RollForSaves(1, attacker, defender);
-
-            // Assert
-            Assert.Equal(0, saves);
-        }
-
-        [Fact]
-        public void RollForSavesTest_HighAp_SaveFailed()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollD6()).Returns(4);
-
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-            var attacker = new RangedWeapon("Bolter", 24, 2, 3, 4, -3, 1, 10);
-            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = 2, InvulnSave = 0 };
-
-            // Act
-            int saves = service.RollForSaves(1, attacker, defender);
-
-            // Assert
-            Assert.Equal(0, saves);
-        }
-
-        // Test Damage Calculation
-        [Fact]
-        public void CalculateDamagetest()
-        {
-            // Arrange
-            var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
-            var rangedWeapon = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
-
-            // Act
-            int damage = service.CalculateDamage(rangedWeapon, 4);
-
-            // Assert
-            Assert.Equal(4, damage);
-        }
-
-        #endregion
-
 
         #region Test CalculateRollToWound
         [Theory]
@@ -296,9 +80,9 @@ namespace SimHammer.Core.Tests
         {
             // Arrange
             var mockRoller = new Mock<IDiceRoller>();
-            var logger = new NullLogger<IRangedCombatService>();
+            var logger = new NullLogger<ICommonCombatRolls>();
 
-            var service = new RangedCombatService(logger, mockRoller.Object);
+            var service = new CommonCombatRolls(logger, mockRoller.Object);
 
             // Act
             int result = service.CalculateRollToWound(weaponStrength, defenderToughness);
@@ -327,8 +111,8 @@ namespace SimHammer.Core.Tests
                 sequence.Returns(diceRolls[i]);
             }
 
-            var logger = new NullLogger<IRangedCombatService>();
-            var service = new RangedCombatService(logger, mockRoller.Object);
+            var logger = new NullLogger<ICommonCombatRolls>();
+            var service = new CommonCombatRolls(logger, mockRoller.Object);
 
             // Act
             int wounds = service.RollForWounds(numHits, rollNeeded);
@@ -338,5 +122,52 @@ namespace SimHammer.Core.Tests
         }
 
         #endregion
+
+        #region Roll For Saves Test
+
+        [Theory]
+        [InlineData(1, -1, 0, false, 1, 0, 1)] // Auto fail save on a roll of 1
+        [InlineData(1, 0, 3, false, 1, 1, 4)] // Successful save on a roll greater than Save value
+        [InlineData(1, 0, 5, false, 5, 0, 3)] // Failed save - roll less than save value
+        [InlineData(1, -2, 5, true, 2, 1, 5)] // Successful save. Use Invuln Save due to weapon AP
+        [InlineData(1, 0, 5, true, 3, 0, 2 )] // Fail save using Invuln Save
+        public void RollForSavesTest(int woundsInflicted, int weaponApValue, int saveValue, bool hasInvuln, int invulnSaveValue, int expectedNbrSaves, int diceRoll)
+        {
+            // Arrange
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollD6()).Returns(diceRoll);
+
+            var logger = new NullLogger<ICommonCombatRolls>();
+            var service = new CommonCombatRolls(logger, mockRoller.Object);
+            var defender = new Unit() { Name = "Defender", Toughness = 5, Save = saveValue, HasInvulnSave = hasInvuln, InvulnSave = invulnSaveValue };
+
+            // Act
+            int saves = service.RollForSaves(woundsInflicted, weaponApValue, defender);
+
+            // Assert
+            Assert.Equal(expectedNbrSaves, saves);
+        }
+
+        // Test Damage Calculation
+        [Fact]
+        public void CalculateDamageTest()
+        {
+            // Arrange
+            var mockRoller = new Mock<IDiceRoller>();
+            var logger = new NullLogger<ICommonCombatRolls>();
+            var service = new CommonCombatRolls(logger, mockRoller.Object);
+            var rangedWeapon = new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 10);
+
+            // Act
+            int damage = service.CalculateDamage(1, 4);
+
+            // Assert
+            Assert.Equal(4, damage);
+        }
+
+        #endregion
+
+
+       
     }
 }

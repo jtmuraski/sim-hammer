@@ -12,7 +12,7 @@ namespace SimHammer.Core.Services.Simulation
     public class CommonCombatRolls : ICommonCombatRolls
     {
         // ---Properties---
-        private readonly ILogger<CommonCombatRolls> _logger;
+        private readonly ILogger<ICommonCombatRolls> _logger;
         private readonly IDiceRoller _diceRoller;
 
         // ---Constructors---
@@ -135,28 +135,30 @@ namespace SimHammer.Core.Services.Simulation
             int savesMade = 0;
             for (int i = 0; i < woundsInflicted; i++)
             {
-                // If a wound was caused, roll for saves. If the defender has an invulnerable save, determine whether to use
-                // the Invuln save or regular save (if Invuln < (Save - weapon.AP))
-                int saveToUse = defender.Save;
-                if (defender.InvulnSave > 0 & defender.InvulnSave <= (defender.Save - weapon.ArmourPiercing))
+                // Roll for the save and then add the weapon's AP value
+                // Then compare the value to the save and Invuln sace
+                int saveRoll  = _diceRoller.RollD6();
+                int modifiedSave = saveRoll + weaponApValue;
+
+                _logger.LogDebug($"Save Roll: {saveRoll}");
+                _logger.LogDebug($"Modified Save: {modifiedSave}");
+                _logger.LogDebug($"Armor Save: {defender.Save}, Invuln Save: {defender.InvulnSave}");
+                if (saveRoll > 1)
                 {
-                    saveToUse = defender.InvulnSave;
+                    // Check against regular armor save
+                    if(modifiedSave >= defender.Save)
+                    {
+                        
+                        savesMade++;
+                    }
+                    else if(defender.HasInvulnSave && modifiedSave >= defender.InvulnSave)
+                    {
+                        savesMade++;
+                    }
                 }
-
-                int saveRoll = _diceRoller.RollD6(); ;
-                _logger.LogInformation($"Save roll: {saveRoll}");
-
-                int apRollResult = saveRoll + weapon.ArmourPiercing;
-                _logger.LogInformation($"Save roll after applying Armour Piercing ({weapon.ArmourPiercing}): {apRollResult}");
-
-                if (saveRoll == 1)
+                else
                 {
-                    _logger.LogInformation("Save roll is a 1. Automatic failed save.");
-                }
-                else if (apRollResult >= saveToUse)
-                {
-                    _logger.LogInformation("Save successful. No damage applied.");
-                    savesMade++;
+                    _logger.LogDebug("Save roll = 1. Auto fail.");
                 }
             }
 

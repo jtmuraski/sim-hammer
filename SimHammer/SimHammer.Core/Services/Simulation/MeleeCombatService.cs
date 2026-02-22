@@ -14,16 +14,14 @@ namespace SimHammer.Core.Services.Simulation
     {
         // ---Properties---
         private readonly ILogger<IMeleeCombatService> _logger;
-        private readonly IDiceRoller _diceRoller;
         private readonly ICommonCombatRolls _commonCombatRolls;
 
         // ---Fields---
 
         // ---Constructors---
-        public MeleeCombatService(ILogger<IMeleeCombatService> logger, IDiceRoller diceRoller, ICommonCombatRolls commonCombatRolls)
+        public MeleeCombatService(ILogger<IMeleeCombatService> logger, ICommonCombatRolls commonCombatRolls)
         {
             _logger = logger;
-            _diceRoller = diceRoller;
             _commonCombatRolls = commonCombatRolls;
         }
         // ---Combat Methods---

@@ -21,6 +21,7 @@ var serviceProvider = new ServiceCollection()
     .AddSingleton<IDiceRoller, DiceRoller>()
     .AddSingleton<SimulationService>()
     .AddSingleton<IMeleeCombatService, MeleeCombatService>()
+    .AddSingleton<ICommonCombatRolls, CommonCombatRolls>()
     .BuildServiceProvider();
 
 var logger = serviceProvider.GetService<ILogger<Program>>();

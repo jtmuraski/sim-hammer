@@ -44,7 +44,7 @@ namespace SimHammer.Core.Tests
                 .Returns(2); // Save fails, damage occurs
             _commonCombatRolls = new CommonCombatRolls(_commonCombatRollsLogger, _mockCombatRolls.Object);
 
-            var service = new RangedCombatService(_rangedLogger, _mockRangedRoller.Object, _commonCombatRolls);
+            var service = new RangedCombatService(_rangedLogger, _commonCombatRolls);
 
             var attacker = new Unit() { Name = "Attacker", Toughness = 5, Save = 4, InvulnSave = 4 };
             attacker.RangedWeapons.Add(new RangedWeapon("Bolter", 24, 2, 3, 4, -1, 1, 1));

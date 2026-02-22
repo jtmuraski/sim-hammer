@@ -44,7 +44,7 @@ namespace SimHammer.Core.Tests
                 .Returns(2); // Save fails, damage occurs
             _commonCombatRolls = new CommonCombatRolls(_commonCombatRollsLogger, _mockCombatRolls.Object);
 
-            var service = new MeleeCombatService(_meleeLogger, _mockRangedRoller.Object, _commonCombatRolls);
+            var service = new MeleeCombatService(_meleeLogger, _commonCombatRolls);
 
             var attacker = new Unit() { Name = "Attacker", Toughness = 5, Save = 4, InvulnSave = 4 };
             attacker.MeleeWeapons.Add(new MeleeWeapon("Chainsword", 12, 2, 3, 4, 0, 1, 1));

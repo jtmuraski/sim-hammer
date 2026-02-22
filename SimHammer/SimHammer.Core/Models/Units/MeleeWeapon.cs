@@ -16,7 +16,7 @@ namespace SimHammer.Core.Models.Units
         public int ArmorPiercing { get; set; } // Armor Penetration
         public int Damage { get; set; }
         public int Quantity { get; set; }
-        public MeleeWeapon(string name, int range, int attacks, int strength, int ap, int damage, int quantity)
+        public MeleeWeapon(string name, int range, int attacks, int weaponSkill, int strength, int ap, int damage, int quantity)
         {
             Name = name;
             Range = range;
@@ -25,6 +25,7 @@ namespace SimHammer.Core.Models.Units
             ArmorPiercing = ap;
             Damage = damage;
             Quantity = quantity;
+            WeaponSkill = weaponSkill;
         }
     }
 }

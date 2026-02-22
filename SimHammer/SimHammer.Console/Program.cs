@@ -20,6 +20,7 @@ var serviceProvider = new ServiceCollection()
     .AddSingleton<IRangedCombatService, RangedCombatService>()
     .AddSingleton<IDiceRoller, DiceRoller>()
     .AddSingleton<SimulationService>()
+    .AddSingleton<IMeleeCombatService, MeleeCombatService>()
     .BuildServiceProvider();
 
 var logger = serviceProvider.GetService<ILogger<Program>>();

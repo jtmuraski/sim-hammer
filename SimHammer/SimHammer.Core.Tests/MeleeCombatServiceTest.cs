@@ -16,7 +16,7 @@ namespace SimHammer.Core.Tests
     {
         // ---Propeties---
         private NullLogger<ICommonCombatRolls> _commonCombatRollsLogger;
-        private NullLogger<IRangedCombatService> _meleeLogger;
+        private NullLogger<IMeleeCombatService> _meleeLogger;
         private Mock<IDiceRoller> _mockCombatRolls;
         private Mock<IDiceRoller> _mockRangedRoller;
         private CommonCombatRolls? _commonCombatRolls;
@@ -24,7 +24,7 @@ namespace SimHammer.Core.Tests
         public MeleeCombatServiceTest()
         {
             _commonCombatRollsLogger = new NullLogger<ICommonCombatRolls>();
-            _meleeLogger = new NullLogger<IRangedCombatService>();
+            _meleeLogger = new NullLogger<IMeleeCombatService>();
             _mockCombatRolls = new Mock<IDiceRoller>();
             _mockRangedRoller = new Mock<IDiceRoller>();
         }

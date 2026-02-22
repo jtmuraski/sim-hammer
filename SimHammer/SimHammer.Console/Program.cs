@@ -41,7 +41,7 @@ Unit attacker = new Unit()
     MeleeWeapons = new List<MeleeWeapon>(),
     RangedWeapons = new List<RangedWeapon>(),
 };
-attacker.MeleeWeapons.Add(new MeleeWeapon("Knife", 0, 2, 2, 0, 1, 10));
+attacker.MeleeWeapons.Add(new MeleeWeapon("Knife", 0, 2, 2, 0, 1, 1, 10));
 attacker.RangedWeapons.Add(new RangedWeapon("Bolter",24,2,3,4,-1,1,10));
 
 Unit defender = new Unit()
@@ -59,7 +59,7 @@ Unit defender = new Unit()
     MeleeWeapons = new List<MeleeWeapon>(),
     RangedWeapons = new List<RangedWeapon>(),
 };
-defender.MeleeWeapons.Add(new MeleeWeapon("Bayonet", 0, 1, 2, 0, 1, 19));
+defender.MeleeWeapons.Add(new MeleeWeapon("Bayonet", 0, 1, 2, 0, 1, 1, 19));
 defender.RangedWeapons.Add(new RangedWeapon("Lasgun", 24, 1, 3, 0, 1,1, 20));
 
 Console.WriteLine("Attacking and Defending unit has been built");

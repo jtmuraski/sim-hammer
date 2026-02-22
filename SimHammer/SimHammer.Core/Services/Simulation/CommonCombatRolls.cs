@@ -151,7 +151,7 @@ namespace SimHammer.Core.Services.Simulation
                         
                         savesMade++;
                     }
-                    else if(defender.HasInvulnSave && modifiedSave >= defender.InvulnSave)
+                    else if(defender.HasInvulnSave && saveRoll >= defender.InvulnSave)
                     {
                         savesMade++;
                     }

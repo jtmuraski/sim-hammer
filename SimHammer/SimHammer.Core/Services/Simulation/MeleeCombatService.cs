@@ -13,14 +13,14 @@ namespace SimHammer.Core.Services.Simulation
     public class MeleeCombatService : IMeleeCombatService
     {
         // ---Properties---
-        private readonly ILogger<IRangedCombatService> _logger;
+        private readonly ILogger<MeleeCombatService> _logger;
         private readonly IDiceRoller _diceRoller;
         private readonly ICommonCombatRolls _commonCombatRolls;
 
         // ---Fields---
 
         // ---Constructors---
-        public MeleeCombatService(ILogger<IRangedCombatService> logger, IDiceRoller diceRoller, ICommonCombatRolls commonCombatRolls)
+        public MeleeCombatService(ILogger<MeleeCombatService> logger, IDiceRoller diceRoller, ICommonCombatRolls commonCombatRolls)
         {
             _logger = logger;
             _diceRoller = diceRoller;
@@ -28,7 +28,7 @@ namespace SimHammer.Core.Services.Simulation
         }
         // ---Combat Methods---
         /// <summary>
-        /// Being a round of Rnaged Combat between two units and return the results
+        /// Being a round of Melee Combat between two units and return the results
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>

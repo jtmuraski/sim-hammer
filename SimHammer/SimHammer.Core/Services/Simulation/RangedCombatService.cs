@@ -32,7 +32,7 @@ namespace SimHammer.Core.Services.Simulation
 
         // ---Combat Methods---
         /// <summary>
-        /// Being a round of Rnaged Combat between two units and return the results
+        /// Being a round of Ranged Combat between two units and return the results
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
@@ -90,7 +90,7 @@ namespace SimHammer.Core.Services.Simulation
                 _logger.LogInformation("Calculating saves for wounds inflicted");
 
                 result.SavesMade = _commonCombatRolls.RollForSaves(result.WoundsInflicted, weapon.ArmourPiercing, defender);
-                result.DamageDealt = _commonCombatRolls.CalculateDamage(result.WoundsInflicted, weapon.Damage);
+                result.DamageDealt = _commonCombatRolls.CalculateDamage((result.WoundsInflicted - result.SavesMade), weapon.Damage);
 
 
                 round.WeaponResults.Add(result);

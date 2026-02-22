@@ -16,12 +16,14 @@ public class SimulationService : ISimulationService
     bool IsSimulationComplete { get; set; }
     private ILogger<SimulationService> _logger;
     private IRangedCombatService _rangedCombatService;
+    private IMeleeCombatService _meleeCombatService;
     
     // ---Contructors---
-    public SimulationService(ILogger<SimulationService> logger, IRangedCombatService rangedCombatService)
+    public SimulationService(ILogger<SimulationService> logger, IRangedCombatService rangedCombatService, IMeleeCombatService meleeCombatService)
     {
         _logger = logger;
         _rangedCombatService = rangedCombatService;
+        _meleeCombatService = meleeCombatService;
         SimResult = new SimulationResult();
         IsSimulationComplete = false;
     }
@@ -41,7 +43,7 @@ public class SimulationService : ISimulationService
 
         for (int i = 1; i <= rounds; i++)
         {
-            SimResult.CombatRounds.Add(SimResult.IsMeleeCombat ? SimulateMeleeCombatRound(attacker, defender, i) : 
+            SimResult.CombatRounds.Add(SimResult.IsMeleeCombat ? _meleeCombatService.SimulateMeleeCombatRound(attacker, defender, i) : 
                                                                 _rangedCombatService.SimulateRangedCombatRound(attacker, defender, i));
             roundsCompleted++;
         }
@@ -51,29 +53,4 @@ public class SimulationService : ISimulationService
 
         return;
     }
-    
-    public CombatRound SimulateMeleeCombatRound(Unit attacker, Unit defender, int roundNumber)
-    {
-        CombatRound round = new CombatRound
-        {
-            Id = roundNumber,
-            SimNumber = roundNumber,
-            ModelsKilled = 0,
-            MoraleSuccessChance = 1.0 // Placeholder for morale success chance
-        };
-
-        // Simulate the combat logic here
-
-        // For each attack, calculate hits, wounds, saves, etc.
-
-        return round;
-    }
-
-   
-
-    
-
-    
-
-   
 }

@@ -53,5 +53,13 @@ namespace SimHammer.Core.Persistance.Documents
 
         [JsonPropertyName("schemaVersion")]
         public int SchemaVersion { get; set; } = 1;
-    }
+
+        [JsonPropertyName("createdTime")]
+        public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+
+        [JsonPropertyName("lastUpdatedTIme")]
+        public DateTime LastUsedTime
+        {
+            get; set;
+        }
 }

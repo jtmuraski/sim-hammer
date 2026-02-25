@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.57.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SimHammer.Core\SimHammer.Core.csproj" />
   </ItemGroup>
 

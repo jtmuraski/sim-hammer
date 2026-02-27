@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Cosmos.Linq;
 
 namespace SimHammer.Core.Persistance.Repositories
 {
@@ -45,19 +46,28 @@ namespace SimHammer.Core.Persistance.Repositories
             return;
         }
 
-        public Task DeleteFactionAsync(string id)
+        public async Task DeleteFactionAsync(string id)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation($"Deleting faction {id}";
+           var response = _container.DeleteItemAsync<FactionDocument>(id, new PartitionKey(id));
+
+            return;
         }
 
-        public Task<IEnumerable<FactionDocument>> GetAllFactionsAsync()
+        public async Task<IEnumerable<FactionDocument>> GetAllFactionsAsync()
         {
-            throw new NotImplementedException();
-        }
+            _logger.LogInformation("Getting all factions from CosmosDB");
+            var results = new List<FactionDocument>();
+            var query = _container.GetItemLinqQueryable<FactionDocument>().ToFeedIterator();
 
-        public Task UpdateFactionAsync(FactionDocument faction)
-        {
-            throw new NotImplementedException();
+            while(query.HasMoreResults)
+            {
+                var response = await query.ReadNextAsync();
+                results.AddRange(response);
+            }
+
+            return results;
+            
         }
     }
 }

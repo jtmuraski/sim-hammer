@@ -24,60 +24,110 @@ namespace SimHammer.Core.Persistance.Repositories
         }
 
         // --- Methods ---
-        public async Task<UnitDocument> AddUnitAsync(UnitDocument unit, CancellationToken ct = default)
+        public async Task<UnitDocument> AddUnitAsync(UnitDocument unit, string factionPartitionKey, CancellationToken ct = default)
         {
             unit.CreatedTime = DateTimeOffset.UtcNow;
             unit.LastUpdatedTime = DateTimeOffset.UtcNow;
-            unit.Id = Guid.NewGuid().ToString();
+            unit.Id = new Guid().ToString();
+            unit.PartitionKey = factionPartitionKey;
+            unit.Type = "unit";
 
-            var response = await _container.CreateItemAsync(unit, new PartitionKey(unit.Faction), cancellationToken: ct);
+            var response = await _container.CreateItemAsync(unit, new PartitionKey(unit.PartitionKey), cancellationToken: ct);
             _logger.LogInformation($"Unit for {unit.Faction} added: {unit.Name}");
 
             return response.Resource;
 
         }
 
-        public async Task DeleteUnitByIdAsync(int id, string faction, CancellationToken ct = default)
+        public async Task DeleteUnitByIdAsync(int id, string factionPartitionKey, CancellationToken ct = default)
         {
             try
             {
-                var response = _container.DeleteItemAsync<UnitDocument>(id.ToString(), new PartitionKey(faction), cancellationToken: ct);
+                var response = await _container.DeleteItemAsync<UnitDocument>(id.ToString(), new PartitionKey(factionPartitionKey), cancellationToken: ct);
                 return;
             }
-            catch(CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 _logger.LogWarning($"Unit with id {id} not found for deletion.");
                 return;
             }
 
         }
-        public Task<IEnumerable<UnitDocument>> GetAllUnitsAsync()
+        public async Task<IEnumerable<UnitDocument>> GetAllUnitsAsync()
         {
-            throw new NotImplementedException();
+            var query = new QueryDefinition("SELECT * FROM container WHERE type = @type")
+                                           .WithParameter("@type", "unit");
+
+            List<UnitDocument> results = new List<UnitDocument>();
+
+            var pageFeeder = _container.GetItemQueryIterator<UnitDocument>(query);
+
+            while (pageFeeder.HasMoreResults)
+            {
+                var page = pageFeeder.ReadNextAsync();
+                results.AddRange(page);
+            }
+
+            return results;
+
         }
 
-        public Task<UnitDocument> GetUnitByIdAsync(string id)
+        public async Task<UnitDocument> GetUnitByIdAsync(string id)
         {
-            throw new NotImplementedException();
+            QueryDefinition query = new QueryDefinition("SELECT * FROM container WHERE Id = @Id AND type = @type")
+                                        .WithParameter("@Id", id)
+                                        .WithParameter("@type", "unit");
+
+            UnitDocument result = new UnitDocument();
+
+            var pageFeeder = _container.GetItemQueryIterator<UnitDocument>(query);
+
+            while (pageFeeder.HasMoreResults)
+            {
+                var page = await pageFeeder.ReadNextAsync();
+                result = page.FirstOrDefault();
+            }
+
+            return result;
         }
 
-        public Task<IEnumerable<UnitDocument>> GetUnitsByFactionAsync(string faction)
+        public async Task<IEnumerable<UnitDocument>> GetUnitsByFactionAsync(string factionId)
         {
-            throw new NotImplementedException();
+            string partitionKey = $"faction-{factionId}";
+
+            var query = new QueryDefinition("SELECT * FROM container WHERE container.partitionKey = @partitionKey AND container.type = @type")
+                                           .WithParameter("@partitionKey", partitionKey)
+                                           .WithParameter("@type", "unit");
+
+            List<UnitDocument> results = new List<UnitDocument>();
+
+            var pageFeeder = _container.GetItemQueryIterator<UnitDocument>(query,
+                                                                           requestOptions: new QueryRequestOptions
+                                                                           { PartitionKey = new PartitionKey(partitionKey) });
+
+
+            while (pageFeeder.HasMoreResults)
+            {
+                var page = await pageFeeder.ReadNextAsync();
+                results.AddRange(page);
+            }
+
+            return results;
         }
 
-        public Task UpdateUnitASync(UnitDocument unit, CancellationToken ct = default)
+        public async Task UpdateUnitAsync(UnitDocument unit, CancellationToken ct = default)
         {
             try
             {
                 unit.LastUpdatedTime = DateTimeOffset.UtcNow;
-                var response = _container.ReplaceItemAsync(unit, unit.Id, new PartitionKey(unit.Faction), cancellationToken: ct);
-                return response;
+                var response = await _container.ReplaceItemAsync(unit, unit.Id, new PartitionKey(unit.Faction), cancellationToken: ct);
+                return;
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 _logger.LogWarning($"Unit with id {unit.Id} not found for update.");
-                return Task.CompletedTask;
+                return;
             }
+        }
     }
 }

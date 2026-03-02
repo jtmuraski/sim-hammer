@@ -10,6 +10,12 @@ namespace SimHammer.Core.Persistance.Documents
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
+        [JsonPropertyName("partitionKey")]
+        public string PartitionKey { get; set; }
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = "faction";
+
         [JsonPropertyName("name")] 
         public string Name { get; set; } = string.Empty;
 

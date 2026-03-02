@@ -27,18 +27,19 @@ namespace SimHammer.Core.Persistance.Repositories
         {
             var newFaction = new FactionDocument
             {
-                Id = factionName,
+                Id = factionName.ToLower().Replace(' ', '-'),
                 Name = factionName,
                 Description = factionDescription,
                 CreationDate = DateTime.UtcNow
             };
+            newFaction.PartitionKey = $"faction-{newFaction.Id}";
 
             try
-            {
-                var response = await _container.CreateItemAsync(newFaction, new PartitionKey(newFaction.Id));
+            {   
+                var response = await _container.CreateItemAsync(newFaction, new PartitionKey(newFaction.PartitionKey));
                 _logger.LogInformation($"Faction {newFaction.Name} has been created.");
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
                 throw new Exception($"The Faction - {newFaction.Name} - already exists!");
             }

@@ -9,6 +9,7 @@ namespace SimHammer.Core.Models.Units
     public class Unit
     {
         // ---Properties---
+        public string Id { get; set; }
         public string Name { get; set; }
         public string? Faction { get; set; }
         public string? Subfaction { get; set; }

@@ -20,7 +20,7 @@ namespace SimHammer.Core.Persistance.Repositories
         public UnitRepository(CosmosClient cosmosClient, ILogger<UnitRepository> logger)
         {
             _logger = logger;
-            _container = cosmosClient.GetContainer("SimHammerDB", "Units");
+            _container = cosmosClient.GetContainer("SimHammerDB", "faction-units");
         }
 
         // --- Methods ---
@@ -28,7 +28,7 @@ namespace SimHammer.Core.Persistance.Repositories
         {
             unit.CreatedTime = DateTimeOffset.UtcNow;
             unit.LastUpdatedTime = DateTimeOffset.UtcNow;
-            unit.Id = new Guid().ToString();
+            unit.Id = Guid.NewGuid().ToString();
             unit.PartitionKey = factionPartitionKey;
             unit.Type = "unit";
 
@@ -39,7 +39,7 @@ namespace SimHammer.Core.Persistance.Repositories
 
         }
 
-        public async Task DeleteUnitByIdAsync(int id, string factionPartitionKey, CancellationToken ct = default)
+        public async Task DeleteUnitByIdAsync(string id, string factionPartitionKey, CancellationToken ct = default)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace SimHammer.Core.Persistance.Repositories
 
             while (pageFeeder.HasMoreResults)
             {
-                var page = pageFeeder.ReadNextAsync();
+                var page = await pageFeeder.ReadNextAsync();
                 results.AddRange(page);
             }
 
@@ -72,23 +72,11 @@ namespace SimHammer.Core.Persistance.Repositories
 
         }
 
-        public async Task<UnitDocument> GetUnitByIdAsync(string id)
+        public async Task<UnitDocument> GetUnitByIdAsync(string id, string factionPartitionKey)
         {
-            QueryDefinition query = new QueryDefinition("SELECT * FROM container WHERE Id = @Id AND type = @type")
-                                        .WithParameter("@Id", id)
-                                        .WithParameter("@type", "unit");
+            var response = await _container.ReadItemAsync<UnitDocument>(id, new PartitionKey(factionPartitionKey));
 
-            UnitDocument result = new UnitDocument();
-
-            var pageFeeder = _container.GetItemQueryIterator<UnitDocument>(query);
-
-            while (pageFeeder.HasMoreResults)
-            {
-                var page = await pageFeeder.ReadNextAsync();
-                result = page.FirstOrDefault();
-            }
-
-            return result;
+            return response.Resource;
         }
 
         public async Task<IEnumerable<UnitDocument>> GetUnitsByFactionAsync(string factionId)
@@ -120,7 +108,7 @@ namespace SimHammer.Core.Persistance.Repositories
             try
             {
                 unit.LastUpdatedTime = DateTimeOffset.UtcNow;
-                var response = await _container.ReplaceItemAsync(unit, unit.Id, new PartitionKey(unit.Faction), cancellationToken: ct);
+                var response = await _container.ReplaceItemAsync(unit, unit.Id, new PartitionKey(unit.PartitionKey), cancellationToken: ct);
                 return;
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)

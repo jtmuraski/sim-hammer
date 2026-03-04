@@ -9,6 +9,6 @@ namespace SimHammer.Core.Persistance.Interfaces
     {
         Task<IEnumerable<FactionDocument>> GetAllFactionsAsync();
          Task AddFactionAsync(string factionName, string? factionDescription);
-         Task DeleteFactionAsync(string id);
+         Task DeleteFactionAsync(string id, string factionPartitionKey, CancellationToken ct);
     }
 }

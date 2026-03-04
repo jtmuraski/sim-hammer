@@ -13,7 +13,7 @@ namespace SimHammer.Core.Persistance.Repositories
     {
         // --- Properties ---
         private readonly ILogger<UnitRepository> _logger;
-        public Container _container;
+        private readonly Container _container;
 
 
         // --- Constructors ----
@@ -49,7 +49,7 @@ namespace SimHammer.Core.Persistance.Repositories
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 _logger.LogWarning($"Unit with id {id} not found for deletion.");
-                return;
+                throw new KeyNotFoundException($"Unit with id {id} not found for deletion.");
             }
 
         }
@@ -72,7 +72,7 @@ namespace SimHammer.Core.Persistance.Repositories
 
         }
 
-        public async Task<UnitDocument> GetUnitByIdAsync(string id, string factionPartitionKey)
+        public async Task<UnitDocument> GetUnitByIdAsync(string id, string factionPartitionKey, CancellationToken ct = default)
         {
             var response = await _container.ReadItemAsync<UnitDocument>(id, new PartitionKey(factionPartitionKey));
 
@@ -114,7 +114,7 @@ namespace SimHammer.Core.Persistance.Repositories
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 _logger.LogWarning($"Unit with id {unit.Id} not found for update.");
-                return;
+                throw new KeyNotFoundException($"Unit with id {unit.Id} not found for update.");
             }
         }
     }

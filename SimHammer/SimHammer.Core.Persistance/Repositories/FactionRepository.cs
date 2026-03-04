@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Cosmos.Linq;
+using SimHammer.Core.Persistance.Tools;
 
 namespace SimHammer.Core.Persistance.Repositories
 {
@@ -19,20 +20,20 @@ namespace SimHammer.Core.Persistance.Repositories
         public FactionRepository(CosmosClient cosmosClient, ILogger<FactionRepository> logger) 
         {
             _logger = logger;
-            _container = cosmosClient.GetContainer("SimHammerDB", "Factions");
+            _container = cosmosClient.GetContainer("SimHammerDB", "faction-units");
         }
 
         // --- Methods ---
-        public async Task AddFactionAsync(string factionName, string? factionDescription)
+        public async Task AddFactionAsync(FactionDocument faction, CancellationToken ct = default)
         {
             var newFaction = new FactionDocument
             {
-                Id = factionName.ToLower().Replace(' ', '-'),
-                Name = factionName,
-                Description = factionDescription,
+                Id = faction.Name.ToLower().Replace(' ', '-'),
+                Name = faction.Name,
+                Description = faction.Description,
                 CreationDate = DateTime.UtcNow
             };
-            newFaction.PartitionKey = $"faction-{newFaction.Id}";
+            newFaction.PartitionKey = PersistanceTools.NormalizeFactionPartitionKey(faction.Name);
 
             try
             {   
@@ -47,10 +48,10 @@ namespace SimHammer.Core.Persistance.Repositories
             return;
         }
 
-        public async Task DeleteFactionAsync(string id)
+        public async Task DeleteFactionAsync(string id, string factionPartitionKey, CancellationToken ct = default)
         {
-            _logger.LogInformation($"Deleting faction {id}";
-           var response = _container.DeleteItemAsync<FactionDocument>(id, new PartitionKey(id));
+            _logger.LogInformation($"Deleting faction {id}");
+           var response = await _container.DeleteItemAsync<FactionDocument>(id, new PartitionKey(factionPartitionKey));
 
             return;
         }

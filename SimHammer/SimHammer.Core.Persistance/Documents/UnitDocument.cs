@@ -63,9 +63,7 @@ namespace SimHammer.Core.Persistance.Documents
         [JsonPropertyName("createdTime")]
         public DateTimeOffset CreatedTime { get; set; } = DateTime.UtcNow;
 
-        [JsonPropertyName("lastUpdatedTIme")]
-        public DateTimeOffset LastUpdatedTime
-        {
-            get; set;
-        }
+        [JsonPropertyName("lastUpdatedTime")]
+        public DateTimeOffset LastUpdatedTime {get; set;}
+    }
 }

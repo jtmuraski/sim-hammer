@@ -3,14 +3,15 @@ using SimHammer.Core.Models.Units;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SimHammer.Core.Persistance.Tools;
 
 namespace SimHammer.Core.Persistance.Mappers
 {
     public static class UnitMapper
     {
         public static UnitDocument ToDocument(this Models.Units.Unit unit)
-        {
-            string partitionKey = $"faction-{unit.Faction}";
+        {         
+            string partitionKey = PersistanceTools.NormalizeFactionPartitionKey(unit.Faction);
 
             return new UnitDocument
             {
@@ -32,24 +33,24 @@ namespace SimHammer.Core.Persistance.Mappers
             };
         }
 
-        public static Unit ToDomain(UnitDocument unit)
+        public static Unit ToDomain(this UnitDocument unit)
         {
             return new Unit
             {
                 Id = unit.Id,
                 Name = unit.Name,
                 Faction = unit.Faction,
-                Movement= unit.Movement,
+                Movement = unit.Movement,
                 Toughness = unit.Toughness,
                 Wounds = unit.Wounds,
                 Leadership = unit.Leadership,
                 Save = unit.Save,
                 HasInvulnSave = unit.HasInvulnSave,
                 InvulnSave = unit.InvulnSave,
-                ModelCount  = unit.ModelCount,
+                ModelCount = unit.ModelCount,
                 MeleeWeapons = unit.MeleeWeapons,
                 RangedWeapons = unit.RangedWeapons
-            }
+            };
         }
 
     }

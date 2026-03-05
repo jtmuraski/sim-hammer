@@ -8,7 +8,7 @@ namespace SimHammer.Core.Persistance.Interfaces
     public interface IFactionRepository
     {
         Task<IEnumerable<FactionDocument>> GetAllFactionsAsync();
-         Task AddFactionAsync(string factionName, string? factionDescription);
+         Task AddFactionAsync(FactionDocument faction, CancellationToken ct);
          Task DeleteFactionAsync(string id, string factionPartitionKey, CancellationToken ct);
     }
 }

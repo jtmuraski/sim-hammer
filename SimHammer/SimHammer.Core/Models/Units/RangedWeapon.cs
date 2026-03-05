@@ -8,6 +8,7 @@ namespace SimHammer.Core.Models.Units
 {
     public class RangedWeapon
     {
+        // --- Properties ---
         public string Name { get; set; }
         public int Range { get; set; }
         public int Attacks { get; set; }
@@ -16,6 +17,12 @@ namespace SimHammer.Core.Models.Units
         public int ArmourPiercing { get; set; }
         public int Damage { get; set; }
         public int Quantity { get; set; } = 1; // Default to 1 if not specified
+
+        // --- Constructors ---
+        public RangedWeapon()
+        {
+            
+        }
         public RangedWeapon(string name, int range, int attacks, int ballisticSkill, int strength, int armourPiercing, int damage, int quantity)
         {
             Name = name;

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SimHammer.Core.Models.Units;
+using SimHammer.Core.Persistance.Tools;
 
 namespace SimHammer.Core.Persistance.Mappers
 {
@@ -9,7 +11,7 @@ namespace SimHammer.Core.Persistance.Mappers
     {
         public static FactionDocument ToDocument(this Models.Units.Faction faction)
         {
-            string partitionKey = $"faction-{faction.Name}";
+            string partitionKey = PersistanceTools.NormalizeFactionPartitionKey(faction.Name);
 
             return new FactionDocument
             {
@@ -22,9 +24,9 @@ namespace SimHammer.Core.Persistance.Mappers
             };
         }
 
-        public static Models.Units.Faction ToDomain(this FactionDocument document)
+        public static Faction ToDomain(this FactionDocument document)
         {
-            return new Models.Units.Faction
+            return new Faction()
             {
                 Id = document.Id,
                 Name = document.Name,

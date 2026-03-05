@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SimHammer.Core.Persistance\SimHammer.Core.Persistance.csproj" />
     <ProjectReference Include="..\SimHammer.Core\SimHammer.Core.csproj" />
   </ItemGroup>
 

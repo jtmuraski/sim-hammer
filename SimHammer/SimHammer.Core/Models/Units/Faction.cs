@@ -15,7 +15,13 @@ namespace SimHammer.Core.Models.Units
 
         public Faction()
         {
-
+            
+        }
+        public Faction(string name, string description)
+        {
+            Name = name;
+            Description = description; 
+            Id = Name.ToLower().Replace(' ', '-');
         }
     }
 }
